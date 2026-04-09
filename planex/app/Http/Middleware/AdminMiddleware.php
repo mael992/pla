@@ -8,14 +8,10 @@ class AdminMiddleware
 {
     public function handle($request, Closure $next)
     {
-        if (!auth()->check()) {
-            return redirect('/login');
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            abort(403);
         }
 
-        if (!auth()->user()->isAdmin()) {
-            return redirect()->route('home')->with('error', 'Accès refusé');
-        }
-
-        return $next($request); // ✅ IMPORTANT
+        return $next($request);
     }
 }

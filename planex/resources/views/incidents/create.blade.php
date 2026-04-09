@@ -1,46 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container py-4" style="max-width: 900px;">
 
-<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Nouvel incident</h1>
+        <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">
+            ← Retour
+        </a>
+    </div>
 
-<h1>➕ Créer un incident</h1>
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form action="{{ route('incidents.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @include('partials.form')
 
-<form method="POST" action="{{ route('incidents.store') }}" enctype="multipart/form-data">
-@csrf
-
-<input type="date" name="date_incident" required><br><br>
-
-<input type="text" name="departement" placeholder="Département"><br><br>
-
-<input type="text" name="systeme" placeholder="Système"><br><br>
-
-<input type="text" name="lot_travail" placeholder="Lot de travail"><br><br>
-
-<input type="text" name="zone" placeholder="Zone"><br><br>
-
-<input type="text" name="etiquette" placeholder="Étiquette"><br><br>
-
-<textarea name="description" placeholder="Description"></textarea><br><br>
-
-<input type="text" name="categorie" placeholder="Catégorie"><br><br>
-
-<input type="text" name="responsabilite" placeholder="Responsabilité"><br><br>
-
-<input type="text" name="emis_par" placeholder="Émis par"><br><br>
-
-<select name="statut">
-    <option value="en_attente">En attente</option>
-    <option value="valide">Validé</option>
-    <option value="refuse">Refusé</option>
-</select><br><br>
-
-<input type="file" name="photo"><br><br>
-
-<button class="btn btn-warning">Créer</button>
-
-</form>
+                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Créer l'incident</button>
+                    <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </div>
-
 @endsection

@@ -3,114 +3,179 @@
 namespace App\Http\Controllers;
 
 use App\Models\Incident;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 
 class IncidentController extends Controller
 {
-    // 📊 LISTE
-   public function index()
+    public function index()
     {
-        $incidents = Incident::orderBy('date_incident', 'desc')
-            ->paginate(10);
-
+        $incidents = Incident::with('zoneobj')->latest('id_incident')->get();
         return view('incidents.index', compact('incidents'));
     }
 
-    // ➕ FORM CREATE
     public function create()
     {
-        return view('incidents.create');
+        $zones = Zone::orderBy('name')->get();
+        return view('incidents.create', compact('zones'));
     }
 
-    // 💾 STORE
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'date_incident' => 'required|date',
-            'departement' => 'required|string',
-            'systeme' => 'nullable|string',
-            'lot_travail' => 'nullable|string',
-            'zone' => 'nullable|string',
-            'etiquette' => 'nullable|string',
-            'description' => 'required|string',
-            'categorie' => 'nullable|string',
-            'interne' => 'nullable|string',
-            'statut' => 'required|string',
-            'responsabilite' => 'nullable|string',
-            'emis_par' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048'
+        $request->validate([
+            'discipline'   => 'required',
+            'systeme'      => 'required',
+            'lot_travail'  => 'required',
+            'zone_id'      => 'required',
+            'description'  => 'required',
+            'categorie'    => 'required',
+            'statut'       => 'required',
+            'photo_ouverte'=> 'nullable|image|max:5120',
+            'photo_fermee' => 'nullable|image|max:5120',
         ]);
 
-        // 📅 date MAJ auto
-        $data['date_maj'] = now();
+        $data = $request->except(['_token', 'date_cloture']);
+        $data['emis_par'] = auth()->user()->username;
 
-        // 📸 upload photo
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('incidents', 'public');
+        // Photo ouverte → date_emis auto
+        if ($request->hasFile('photo_ouverte')) {
+            $data['photo_ouverte'] = $request->file('photo_ouverte')
+                ->store('incidents', 'public');
+            $data['date_emis'] = now()->toDateString();
+        }
+
+        // Photo fermée → date_maj auto
+        if ($request->hasFile('photo_fermee')) {
+            $data['photo_fermee'] = $request->file('photo_fermee')
+                ->store('incidents', 'public');
+            $data['date_maj'] = now()->toDateString();
+        }
+
+        // Statut fermé → date_cloture auto
+        if ($request->statut === 'fermer') {
+            $data['date_cloture'] = now()->toDateString();
+        } else {
+            $data['date_cloture'] = null;
         }
 
         Incident::create($data);
 
-        return redirect()->route('incidents.index')->with('success', 'Incident créé');
+        return redirect()->route('incidents.index')
+            ->with('success', 'Incident créé avec succès.');
     }
 
-    // 🔍 SHOW
-    public function show($id_incident)
+   public function show($id)
     {
-        $incident = Incident::where('id_incident', $id_incident)->firstOrFail();
+        // with('zone') force le chargement de la relation
+        $incident = Incident::with('zoneobj')->findOrFail($id);
 
         return view('incidents.show', compact('incident'));
     }
 
-    // ✏️ EDIT
-    public function edit($id_incident)
+   public function edit($id)
     {
-        $incident = Incident::where('id_incident', $id_incident)->firstOrFail();
+        $incident = Incident::with('zoneobj')->findOrFail($id);
+        $zones    = Zone::orderBy('name')->get();
 
-        return view('incidents.edit', compact('incident'));
+        return view('incidents.edit', compact('incident', 'zones'));
     }
 
-    // 🔄 UPDATE
-    public function update(Request $request, $id_incident)
+    public function update(Request $request, $id)
     {
-        $incident = Incident::where('id_incident', $id_incident)->firstOrFail();
+        $incident = Incident::findOrFail($id);
 
-        $data = $request->validate([
-            'date_incident' => 'required|date',
-            'departement' => 'required|string',
-            'systeme' => 'nullable|string',
-            'lot_travail' => 'nullable|string',
-            'zone' => 'nullable|string',
-            'etiquette' => 'nullable|string',
-            'description' => 'required|string',
-            'categorie' => 'nullable|string',
-            'interne' => 'nullable|string',
-            'statut' => 'required|string',
-            'responsabilite' => 'nullable|string',
-            'emis_par' => 'nullable|string',
-            'photo' => 'nullable|image|max:2048'
+        // Si fermé, seul le statut est modifiable
+        if ($incident->statut === 'fermer') {
+            $newStatut = $request->input('statut');
+            if ($newStatut && $newStatut !== 'fermer') {
+                $incident->update([
+                    'statut'       => $newStatut,
+                    'date_cloture' => null,
+                ]);
+                return redirect()->route('incidents.index')
+                    ->with('success', 'Statut réouvert.');
+            }
+            return redirect()->back()
+                ->with('error', 'Incident fermé — seul le statut peut être modifié.');
+        }
+
+        $request->validate([
+            'discipline'   => 'required',
+            'systeme'      => 'required',
+            'lot_travail'  => 'required',
+            'zone_id'      => 'required',
+            'description'  => 'required',
+            'categorie'    => 'required',
+            'statut'       => 'required',
+            'photo_ouverte'=> 'nullable|image|max:5120',
+            'photo_fermee' => 'nullable|image|max:5120',
         ]);
 
-        // 📅 update date MAJ
-        $data['date_maj'] = now();
+        $data = $request->except(['_token', '_method', 'date_cloture']);
 
-        // 📸 update photo
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('incidents', 'public');
+        if ($request->hasFile('photo_ouverte')) {
+            $data['photo_ouverte'] = $request->file('photo_ouverte')
+                ->store('incidents', 'public');
+            $data['date_emis'] = now()->toDateString();
+        }
+
+        if ($request->hasFile('photo_fermee')) {
+            $data['photo_fermee'] = $request->file('photo_fermee')
+                ->store('incidents', 'public');
+            $data['date_maj'] = now()->toDateString();
+        }
+
+        if ($request->statut === 'fermer') {
+            $data['date_cloture'] = now()->toDateString();
+        } else {
+            $data['date_cloture'] = null;
         }
 
         $incident->update($data);
 
-        return redirect()->route('incidents.index')->with('success', 'Incident modifié');
+        return redirect()->route('incidents.index')
+            ->with('success', 'Incident modifié.');
     }
 
-    // 🗑 DELETE
-    public function destroy($id_incident)
+    public function destroy($id)
     {
-        $incident = Incident::where('id_incident', $id_incident)->firstOrFail();
+        Incident::findOrFail($id)->delete();
+        return redirect()->route('incidents.index')
+            ->with('success', 'Incident supprimé.');
+    }
 
-        $incident->delete();
+    /**
+ * POLL — retourne les incidents plus récents qu'un ID donné
+ */
+    public function poll(Request $request)
+    {
+        $lastId = (int) $request->query('last_id', 0);
 
-        return redirect()->route('incidents.index')->with('success', 'Incident supprimé');
+        $nouveaux = Incident::with('zoneObj')
+            ->where('id_incident', '>', $lastId)
+            ->latest('id_incident')
+            ->get()
+            ->map(function ($i) {
+                return [
+                    'id'         => $i->id_incident,
+                    'date_emis'  => $i->date_emis
+                        ? \Carbon\Carbon::parse($i->date_emis)->format('d/m/Y')
+                        : '—',
+                    'zone'       => $i->zoneObj->name ?? '—',
+                    'discipline' => $i->discipline ?? '—',
+                    'categorie'  => $i->categorie ?? '—',
+                    'statut'     => $i->statut ?? '—',
+                    'url_voir'   => route('incidents.show', $i->id_incident),
+                    'url_edit'   => route('incidents.edit', $i->id_incident),
+                    'url_delete' => route('incidents.destroy', $i->id_incident),
+                ];
+            });
+
+        return response()->json([
+            'nouveaux' => $nouveaux,
+            'last_id'  => $nouveaux->isNotEmpty()
+                ? $nouveaux->first()['id']
+                : $lastId,
+        ]);
     }
 }
