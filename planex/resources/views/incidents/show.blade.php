@@ -51,7 +51,7 @@
                 </div>
                 <div class="info-row">
                     <dt>Catégorie</dt>
-                    <dd>{{ $incident->categorie ?? '—' }}</dd>
+                    <dd>{{ $incident->categorie_label ?? '—' }}</dd>
                 </div>
                 <div class="info-row">
                     <dt>Interne</dt>

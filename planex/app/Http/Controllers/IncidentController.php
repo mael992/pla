@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incident;
 use App\Models\Zone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class IncidentController extends Controller
 {
@@ -24,13 +25,13 @@ class IncidentController extends Controller
     {
         $request->validate([
             'discipline'   => 'required',
-            'systeme'      => 'required',
-            'lot_travail'  => 'required',
-            'zone_id'      => 'required',
-            'description'  => 'required',
-            'categorie'    => 'required',
-            'statut'       => 'required',
-            'photo_ouverte'=> 'nullable|image|max:5120',
+            'systeme'      => 'nullable',
+            'lot_travail'  => 'nullable',
+            'zone_id'      => 'nullable',
+            'description'  => 'nullable',
+            'categorie'    => 'nullable',
+            'statut'       => 'nullable',
+            'photo_ouverte'=> 'required|image|max:5120',
             'photo_fermee' => 'nullable|image|max:5120',
         ]);
 
@@ -81,65 +82,122 @@ class IncidentController extends Controller
     }
 
     public function update(Request $request, $id)
+{
+    $incident = Incident::findOrFail($id);
+
+    // Si fermé, seul le statut est modifiable
+    if ($incident->statut === 'fermer') {
+        $newStatut = $request->input('statut');
+        if ($newStatut && $newStatut !== 'fermer') {
+            $incident->update([
+                'statut'       => $newStatut,
+                'date_cloture' => null,
+            ]);
+            return redirect()->route('incidents.index')
+                ->with('success', 'Statut réouvert.');
+        }
+        return redirect()->back()
+            ->with('error', 'Incident fermé — seul le statut peut être modifié.');
+    }
+
+    // Vérifie si après modification la photo ouverte sera toujours présente
+    // (obligatoire : soit elle existe déjà et n'est pas supprimée, soit une nouvelle est uploadée)
+    $photoOuverteExisteApres = (
+        $request->hasFile('photo_ouverte')
+    ) || (
+        !empty($incident->photo_ouverte) && $request->input('remove_photo_ouverte') != '1'
+    );
+
+    $request->validate([
+        'discipline'    => 'required',
+        'systeme'       => 'nullable',
+        'lot_travail'   => 'nullable',
+        'zone_id'       => 'nullable',
+        'description'   => 'nullable',
+        'categorie'     => 'nullable',
+        'statut'        => 'nullable',
+        'photo_ouverte' => 'nullable|image|max:5120',
+        'photo_fermee'  => 'nullable|image|max:5120',
+    ]);
+
+    // Validation manuelle : photo ouverte obligatoire après modification
+    if (!$photoOuverteExisteApres) {
+        return redirect()->back()
+            ->withErrors(['photo_ouverte' => 'La photo ouverte est obligatoire.'])
+            ->withInput();
+    }
+
+    $data = $request->except(['_token', '_method', 'date_cloture',
+                               'remove_photo_ouverte', 'remove_photo_fermee']);
+
+    // ===== SUPPRESSION PHOTO OUVERTE =====
+    if ($request->input('remove_photo_ouverte') == '1') {
+        if (!empty($incident->photo_ouverte)
+            && Storage::disk('public')->exists($incident->photo_ouverte)) {
+            Storage::disk('public')->delete($incident->photo_ouverte);
+        }
+        $data['photo_ouverte'] = null;
+        $data['date_emis']     = null;
+    }
+
+    // ===== SUPPRESSION PHOTO FERMÉE =====
+    if ($request->input('remove_photo_fermee') == '1') {
+        if (!empty($incident->photo_fermee)
+            && Storage::disk('public')->exists($incident->photo_fermee)) {
+            Storage::disk('public')->delete($incident->photo_fermee);
+        }
+        $data['photo_fermee'] = null;
+        $data['date_maj']     = null;
+    }
+
+    // ===== NOUVELLE PHOTO OUVERTE =====
+    if ($request->hasFile('photo_ouverte')) {
+        if ($incident->photo_ouverte) {
+            Storage::disk('public')->delete($incident->photo_ouverte);
+        }
+        $data['photo_ouverte'] = $request->file('photo_ouverte')
+            ->store('incidents', 'public');
+        $data['date_emis'] = now()->toDateString();
+    }
+
+    // ===== NOUVELLE PHOTO FERMÉE =====
+    if ($request->hasFile('photo_fermee')) {
+        if ($incident->photo_fermee) {
+            Storage::disk('public')->delete($incident->photo_fermee);
+        }
+        $data['photo_fermee'] = $request->file('photo_fermee')
+            ->store('incidents', 'public');
+        $data['date_maj'] = now()->toDateString();
+    }
+
+    // ===== STATUT =====
+    if (isset($data['statut']) && $data['statut'] === 'fermer') {
+        $data['date_cloture'] = now()->toDateString();
+    } else {
+        $data['date_cloture'] = null;
+    }
+
+    // ← MANQUAIT : sauvegarde + redirect
+    $incident->update($data);
+
+    return redirect()->route('incidents.index')
+        ->with('success', 'Incident modifié.');
+    }
+
+   public function destroy($id)
     {
         $incident = Incident::findOrFail($id);
 
-        // Si fermé, seul le statut est modifiable
-        if ($incident->statut === 'fermer') {
-            $newStatut = $request->input('statut');
-            if ($newStatut && $newStatut !== 'fermer') {
-                $incident->update([
-                    'statut'       => $newStatut,
-                    'date_cloture' => null,
-                ]);
-                return redirect()->route('incidents.index')
-                    ->with('success', 'Statut réouvert.');
-            }
-            return redirect()->back()
-                ->with('error', 'Incident fermé — seul le statut peut être modifié.');
+        if ($incident->photo_ouverte) {
+            Storage::disk('public')->delete($incident->photo_ouverte);
         }
 
-        $request->validate([
-            'discipline'   => 'required',
-            'systeme'      => 'required',
-            'lot_travail'  => 'required',
-            'zone_id'      => 'required',
-            'description'  => 'required',
-            'categorie'    => 'required',
-            'statut'       => 'required',
-            'photo_ouverte'=> 'nullable|image|max:5120',
-            'photo_fermee' => 'nullable|image|max:5120',
-        ]);
-
-        $data = $request->except(['_token', '_method', 'date_cloture']);
-
-        if ($request->hasFile('photo_ouverte')) {
-            $data['photo_ouverte'] = $request->file('photo_ouverte')
-                ->store('incidents', 'public');
-            $data['date_emis'] = now()->toDateString();
+        if ($incident->photo_fermee) {
+            Storage::disk('public')->delete($incident->photo_fermee);
         }
 
-        if ($request->hasFile('photo_fermee')) {
-            $data['photo_fermee'] = $request->file('photo_fermee')
-                ->store('incidents', 'public');
-            $data['date_maj'] = now()->toDateString();
-        }
+        $incident->delete();
 
-        if ($request->statut === 'fermer') {
-            $data['date_cloture'] = now()->toDateString();
-        } else {
-            $data['date_cloture'] = null;
-        }
-
-        $incident->update($data);
-
-        return redirect()->route('incidents.index')
-            ->with('success', 'Incident modifié.');
-    }
-
-    public function destroy($id)
-    {
-        Incident::findOrFail($id)->delete();
         return redirect()->route('incidents.index')
             ->with('success', 'Incident supprimé.');
     }
@@ -163,7 +221,7 @@ class IncidentController extends Controller
                         : '—',
                     'zone'       => $i->zoneObj->name ?? '—',
                     'discipline' => $i->discipline ?? '—',
-                    'categorie'  => $i->categorie ?? '—',
+                    'categorie'  => $i->categorie_label ?? '—',
                     'statut'     => $i->statut ?? '—',
                     'url_voir'   => route('incidents.show', $i->id_incident),
                     'url_edit'   => route('incidents.edit', $i->id_incident),

@@ -23,4 +23,16 @@ class Incident extends Model
     {
         return $this->belongsTo(Zone::class, 'zone_id', 'id');
     }
+
+    public const CATEGORIES = [
+        'A' => 'A — Avant Pre-commissioning',
+        'B' => 'B — Avant la Mechanical Completion',
+        'C' => 'C — Après la Mechanical Completion',
+        'D' => 'D — Après la Mise en route',
+    ];
+
+    public function getCategorieLabelAttribute()
+    {
+        return self::CATEGORIES[$this->categorie] ?? $this->categorie;
+    }
 }

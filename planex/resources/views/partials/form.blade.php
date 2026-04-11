@@ -17,15 +17,16 @@
     ];
 
     $statuts = [
-        'na'      => '⬛ N/A',
-        'ouvert'  => '🟥 Ouvert',
-        'en_cours'=> '🟧 En cours',
-        'fermer'  => '🟩 Fermé',
+        'na'       => '⬛ N/A',
+        'ouvert'   => '🟥 Ouvert',
+        'en_cours' => '🟧 En cours',
+        'fermer'   => '🟩 Fermé',
     ];
 
-    $isFerme = isset($incident) && $incident->statut === 'fermer';
-    $ro = $isFerme ? 'readonly' : '';          // attribut HTML readonly
-    $dis = $isFerme ? 'disabled' : '';         // attribut HTML disabled
+    $isFerme  = isset($incident) && $incident->statut === 'fermer';
+    $isEdit   = isset($incident);
+    $ro       = $isFerme ? 'readonly' : '';
+    $dis      = $isFerme ? 'disabled' : '';
 @endphp
 
 @if($errors->any())
@@ -48,7 +49,9 @@
 
     {{-- DISCIPLINE --}}
     <div class="col-md-6">
-        <label class="form-label">Discipline <span class="text-danger">*</span></label>
+        <label class="form-label">
+            Discipline <span class="text-danger">*</span>
+        </label>
         <select name="discipline"
                 class="form-select @error('discipline') is-invalid @enderror"
                 {{ $dis }}>
@@ -60,35 +63,31 @@
                 </option>
             @endforeach
         </select>
-        @error('discipline') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        @error('discipline')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     {{-- SYSTÈME --}}
     <div class="col-md-6">
-        <label class="form-label">Système <span class="text-danger">*</span></label>
-        <input type="text" name="systeme"
-               class="form-control @error('systeme') is-invalid @enderror"
+        <label class="form-label">Système</label>
+        <input type="text" name="systeme" class="form-control"
                value="{{ old('systeme', $incident->systeme ?? '') }}"
                {{ $ro }}>
-        @error('systeme') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- LOT DE TRAVAIL --}}
     <div class="col-md-6">
-        <label class="form-label">Lot de travail <span class="text-danger">*</span></label>
-        <input type="text" name="lot_travail"
-               class="form-control @error('lot_travail') is-invalid @enderror"
+        <label class="form-label">Lot de travail</label>
+        <input type="text" name="lot_travail" class="form-control"
                value="{{ old('lot_travail', $incident->lot_travail ?? '') }}"
                {{ $ro }}>
-        @error('lot_travail') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- ZONE --}}
     <div class="col-md-6">
-        <label class="form-label">Zone <span class="text-danger">*</span></label>
-        <select name="zone_id"
-                class="form-select @error('zone_id') is-invalid @enderror"
-                {{ $dis }}>
+        <label class="form-label">Zone</label>
+        <select name="zone_id" class="form-select" {{ $dis }}>
             <option value="">— Sélectionner —</option>
             @foreach($zones as $zone)
                 <option value="{{ $zone->id }}"
@@ -97,7 +96,6 @@
                 </option>
             @endforeach
         </select>
-        @error('zone_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
         <div class="form-text">
             <a href="{{ route('zones.index') }}" target="_blank">Gérer les zones</a>
         </div>
@@ -113,19 +111,16 @@
 
     {{-- CATÉGORIE --}}
     <div class="col-md-6">
-        <label class="form-label">Catégorie <span class="text-danger">*</span></label>
-        <select name="categorie"
-                class="form-select @error('categorie') is-invalid @enderror"
-                {{ $dis }}>
+        <label class="form-label">Catégorie</label>
+        <select name="categorie" class="form-select" {{ $dis }}>
             <option value="">— Sélectionner —</option>
-            @foreach($categories as $val => $label)
-                <option value="{{ $val }}"
-                    {{ old('categorie', $incident->categorie ?? '') === $val ? 'selected' : '' }}>
+            @foreach(\App\Models\Incident::CATEGORIES as $key => $label)
+                <option value="{{ $key }}"
+                    {{ old('categorie', $incident->categorie ?? '') == $key ? 'selected' : '' }}>
                     {{ $label }}
                 </option>
             @endforeach
         </select>
-        @error('categorie') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- INTERNE --}}
@@ -146,10 +141,8 @@
 
     {{-- STATUT --}}
     <div class="col-md-6">
-        <label class="form-label">Statut <span class="text-danger">*</span></label>
-        <select name="statut"
-                class="form-select @error('statut') is-invalid @enderror"
-                id="selectStatut"
+        <label class="form-label">Statut</label>
+        <select name="statut" class="form-select" id="selectStatut"
                 onchange="handleStatutChange(this.value)">
             @foreach($statuts as $val => $label)
                 <option value="{{ $val }}"
@@ -158,28 +151,30 @@
                 </option>
             @endforeach
         </select>
-        @error('statut') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- CLÔTURE PRÉVUE --}}
     <div class="col-md-6">
         <label class="form-label">Clôture prévue</label>
         <input type="date" name="cloture_prevue" class="form-control"
-               id="cloturePrevue"
-               value="{{ old('cloture_prevue', isset($incident->cloture_prevue) ? \Carbon\Carbon::parse($incident->cloture_prevue)->format('Y-m-d') : '') }}"
+               value="{{ old('cloture_prevue', isset($incident->cloture_prevue)
+                   ? \Carbon\Carbon::parse($incident->cloture_prevue)->format('Y-m-d')
+                   : '') }}"
                {{ $ro }}>
     </div>
 
-    {{-- DATE CLÔTURE (auto si fermé, readonly) --}}
-    <div class="col-md-6" id="rowDateCloture"
-         style="{{ (!$isFerme && old('statut', $incident->statut ?? '') !== 'fermer') ? 'display:none' : '' }}">
+    {{-- DATE CLÔTURE auto (affichée si statut = fermer) --}}
+    <div class="col-md-6" id="rowDateCloture" style="display:none">
         <label class="form-label">Date de clôture</label>
         <input type="text" class="form-control bg-light"
-               value="{{ isset($incident->date_cloture) ? \Carbon\Carbon::parse($incident->date_cloture)->format('d/m/Y') : now()->format('d/m/Y') }}"
+               value="{{ isset($incident->date_cloture)
+                   ? \Carbon\Carbon::parse($incident->date_cloture)->format('d/m/Y')
+                   : now()->format('d/m/Y') }}"
                readonly>
-        {{-- Champ caché transmis au contrôleur --}}
         <input type="hidden" name="date_cloture"
-               value="{{ isset($incident->date_cloture) ? $incident->date_cloture : now()->toDateString() }}">
+               value="{{ isset($incident->date_cloture)
+                   ? $incident->date_cloture
+                   : now()->toDateString() }}">
     </div>
 
     {{-- QFC OUVERT --}}
@@ -200,61 +195,168 @@
 
     {{-- DESCRIPTION --}}
     <div class="col-12">
-        <label class="form-label">Description & remarques <span class="text-danger">*</span></label>
-        <textarea name="description" rows="4"
-                  class="form-control @error('description') is-invalid @enderror"
+        <label class="form-label">Description & remarques</label>
+        <textarea name="description" rows="4" class="form-control"
                   {{ $ro }}>{{ old('description', $incident->description ?? '') }}</textarea>
-        @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
-    {{-- PHOTO OUVERTE --}}
+    {{-- ============================================================
+         PHOTO OUVERTE
+         — Nouveau incident  : obligatoire (required)
+         — Modification      : optionnelle si déjà présente,
+                               bouton supprimer disponible
+    ============================================================= --}}
     <div class="col-md-6">
         <label class="form-label">
             Photo ouverte
-            <span class="text-muted small">(définit automatiquement la date d'émission)</span>
+            @if(!$isEdit)
+                <span class="text-danger">*</span>
+            @endif
+            <span class="text-muted small">
+                (définit automatiquement la date d'émission)
+            </span>
         </label>
-        @if(!empty($incident->photo_ouverte ?? null))
-            <div class="mb-2">
+
+        {{-- Preview photo existante (mode edit) --}}
+        @if($isEdit && !empty($incident->photo_ouverte))
+            <div id="previewPhotoOuverte" class="mb-2">
                 <img src="{{ asset('storage/'.$incident->photo_ouverte) }}"
                      class="img-thumbnail" style="max-height: 120px;">
             </div>
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger mb-2"
+                    id="btnSupprimerOuverte"
+                    onclick="supprimerPhoto('ouverte')">
+                🗑 Supprimer la photo
+            </button>
+        @else
+            <div id="previewPhotoOuverte"></div>
         @endif
-        <input type="file" name="photo_ouverte" class="form-control"
-               accept="image/*" capture="environment"
-               {{ $ro }}>
+
+        {{-- Champ caché pour signaler la suppression au contrôleur --}}
+        <input type="hidden" name="remove_photo_ouverte"
+               id="removePhotoOuverte" value="0">
+
+        {{-- Input fichier --}}
+        <input type="file"
+               name="photo_ouverte"
+               id="inputPhotoOuverte"
+               class="form-control @error('photo_ouverte') is-invalid @enderror"
+               accept="image/*"
+               {{ !$isEdit ? 'required' : '' }}
+               {{ $ro }}
+               onchange="previewImage(this, 'previewPhotoOuverte', 'removePhotoOuverte',
+                                      'btnSupprimerOuverte')">
+        @error('photo_ouverte')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
-    {{-- PHOTO FERMÉE --}}
+    {{-- ============================================================
+         PHOTO FERMÉE — toujours optionnelle
+    ============================================================= --}}
     <div class="col-md-6">
         <label class="form-label">
             Photo fermée
-            <span class="text-muted small">(définit automatiquement la date de mise à jour)</span>
+            <span class="text-muted small">
+                (définit automatiquement la date de mise à jour)
+            </span>
         </label>
-        @if(!empty($incident->photo_fermee ?? null))
-            <div class="mb-2">
+
+        @if($isEdit && !empty($incident->photo_fermee))
+            <div id="previewPhotoFermee" class="mb-2">
                 <img src="{{ asset('storage/'.$incident->photo_fermee) }}"
                      class="img-thumbnail" style="max-height: 120px;">
             </div>
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger mb-2"
+                    id="btnSupprimerFermee"
+                    onclick="supprimerPhoto('fermee')">
+                🗑 Supprimer la photo
+            </button>
+        @else
+            <div id="previewPhotoFermee"></div>
         @endif
-        <input type="file" name="photo_fermee" class="form-control"
-               accept="image/*" capture="environment"
-               {{ $ro }}>
+
+        <input type="hidden" name="remove_photo_fermee"
+               id="removePhotoFermee" value="0">
+
+        <input type="file"
+               name="photo_fermee"
+               id="inputPhotoFermee"
+               class="form-control"
+               accept="image/*"
+               {{ $ro }}
+               onchange="previewImage(this, 'previewPhotoFermee', 'removePhotoFermee',
+                                      'btnSupprimerFermee')">
     </div>
 
-</div>
+</div>{{-- fin .row --}}
 
 <script>
+// ===== STATUT → affiche/masque date clôture =====
 function handleStatutChange(val) {
-    const row = document.getElementById('rowDateCloture');
-    if (val === 'fermer') {
-        row.style.display = '';
-    } else {
-        row.style.display = 'none';
-    }
+    document.getElementById('rowDateCloture').style.display =
+        val === 'fermer' ? '' : 'none';
 }
-// Init au chargement
 document.addEventListener('DOMContentLoaded', function () {
     const sel = document.getElementById('selectStatut');
     if (sel) handleStatutChange(sel.value);
 });
+
+// ===== SUPPRIMER PHOTO =====
+// type = 'ouverte' | 'fermee'
+function supprimerPhoto(type) {
+    const preview  = document.getElementById('previewPhoto' + cap(type));
+    const input    = document.getElementById('inputPhoto'   + cap(type));
+    const hidden   = document.getElementById('removePhoto'  + cap(type));
+    const btn      = document.getElementById('btnSupprimer' + cap(type));
+
+    // Masque preview + bouton supprimer
+    if (preview) preview.innerHTML = '';
+    if (btn)     btn.style.display = 'none';
+
+    // Vide le file input
+    if (input) input.value = '';
+
+    // Si c'est la photo ouverte en mode création, la rendre obligatoire
+    // (en edit on autorise la suppression + nouvelle upload)
+    if (hidden) hidden.value = '1';
+}
+
+// ===== PREVIEW APRÈS SÉLECTION D'UN FICHIER =====
+function previewImage(input, previewId, hiddenId, btnId) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById(previewId);
+        if (!preview) return;
+
+        // Remplace ou crée l'image de preview
+        let img = preview.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            img.className = 'img-thumbnail';
+            img.style.maxHeight = '120px';
+            preview.appendChild(img);
+        }
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    // Annule une éventuelle suppression précédente
+    const hidden = document.getElementById(hiddenId);
+    if (hidden) hidden.value = '0';
+
+    // Ré-affiche le bouton supprimer si besoin
+    const btn = document.getElementById(btnId);
+    if (btn) btn.style.display = '';
+}
+
+// Capitalise la première lettre (helper)
+function cap(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 </script>
