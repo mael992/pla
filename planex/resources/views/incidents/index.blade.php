@@ -11,22 +11,30 @@
     </div>
     <div class="sidebar-divider"></div>
     <nav class="sidebar-nav">
+        
+        <a href="{{ route('home') }}" class="sidebar-link">
+            <span class="sidebar-icon" style="font-size:16px">🏠️</span> Accueil
+        </a>
+        <a href="{{ route('infos') }}" class="sidebar-link">
+            <span class="sidebar-icon" style="font-size:16px">ℹ️</span> Infos
+        </a>
+        <a href="{{ route('contact') }}" class="sidebar-link">
+            <span class="sidebar-icon" style="font-size:16px">📞</span> Contact
+        </a>
         <a href="{{ route('incidents.index') }}" class="sidebar-link active">
             <span class="sidebar-icon" style="font-size:16px">📋</span> Incidents
         </a>
-        <a href="{{ route('incidents.create') }}" class="sidebar-link">
-            <span class="sidebar-icon" style="font-size:16px">➕</span> Nouvel incident
-        </a>
-        <a href="{{ route('zones.index') }}" class="sidebar-link">
-            <span class="sidebar-icon" style="font-size:16px">📍</span> Gérer les zones
-        </a>
         <div class="sidebar-divider"></div>
         <a href="{{ route('incidents.create') }}" class="sidebar-cta">
-            <span style="font-size:16px">💬</span> Ajouter un incident
+            <span style="font-size:16px">➕</span> Ajouter un incident
+        </a>
+        <a href="{{ route('zones.index') }}" class="sidebar-cta">
+            <span style="font-size:16px">📍</span> Gérer les zones
         </a>
     </nav>
-    <div class="sidebar-divider"></div>
+    
     <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
         <div class="sidebar-footer-item">
             <span style="font-size:16px">👤</span>
             <span>{{ auth()->user()->username ?? '—' }}</span>
@@ -35,6 +43,13 @@
             <span style="font-size:16px">🔰</span>
             <span>{{ ucfirst(auth()->user()->role ?? 'user') }}</span>
         </div>
+         
+        @if(auth()->user()->isAdmin())
+        <div class="sidebar-divider"></div>
+                    <a href="{{ route('users.index') }}" class="sidebar-link">
+            <span class="sidebar-icon" style="font-size:16px">🛠️</span> Gérer les comptes d'utilisateur
+        </a>
+                @endif
     </div>
 </div>
 
@@ -53,9 +68,7 @@
         <div class="d-flex align-items-center gap-3">
             <h1 class="h3 mb-0">Incidents</h1>
         </div>
-        <a href="{{ route('incidents.create') }}" class="btn btn-primary">
-            + Ajouter un incident
-        </a>
+        
     </div>
 
     <div class="card shadow-sm">

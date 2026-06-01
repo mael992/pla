@@ -31,8 +31,8 @@ class IncidentController extends Controller
             'description'  => 'nullable',
             'categorie'    => 'nullable',
             'statut'       => 'nullable',
-            'photo_ouverte'=> 'required|image|max:5120',
-            'photo_fermee' => 'nullable|image|max:5120',
+            'photo_ouverte' => 'required|image|max:20480',
+'photo_fermee'  => 'nullable|image|max:20480',
         ]);
 
         $data = $request->except(['_token', 'date_cloture']);
@@ -116,8 +116,8 @@ class IncidentController extends Controller
         'description'   => 'nullable',
         'categorie'     => 'nullable',
         'statut'        => 'nullable',
-        'photo_ouverte' => 'nullable|image|max:5120',
-        'photo_fermee'  => 'nullable|image|max:5120',
+	'photo_ouverte' => 'required|image|max:20480',
+        'photo_fermee'  => 'nullable|image|max:20480',
     ]);
 
     // Validation manuelle : photo ouverte obligatoire après modification

@@ -10,6 +10,7 @@ require __DIR__.'/auth.php';
 // PUBLIC
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/infos', [PageController::class, 'infos'])->name('infos');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 
 // INCIDENTS (admin + incident)
 Route::middleware(['auth', 'incidents.access'])->group(function () {

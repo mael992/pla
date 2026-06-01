@@ -13,4 +13,8 @@ class PageController extends Controller
     public function infos() {
         return view('infos'); // resources/views/infos.blade.php
     }
+
+	public function contact() {
+        return view('contact'); // resources/views/contact.blade.php
+    }
 }

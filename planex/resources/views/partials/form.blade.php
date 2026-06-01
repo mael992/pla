@@ -2,12 +2,14 @@
     @method('PUT')
 @endisset
 
+
 @php
     $disciplines = [
         'VRD', 'Génie civil', 'Structure métallique', 'Structure bâtiment',
         'Équipement', 'Tuyauterie', 'Calorifuge',
         'Électricité', 'Instrumentation', 'Automatisme',
     ];
+
 
     $categories = [
         'A' => 'A — Avant Pre-commissioning',
@@ -16,6 +18,7 @@
         'D' => 'D — Après la Mise en route',
     ];
 
+
     $statuts = [
         'na'       => '⬛ N/A',
         'ouvert'   => '🟥 Ouvert',
@@ -23,11 +26,13 @@
         'fermer'   => '🟩 Fermé',
     ];
 
+
     $isFerme  = isset($incident) && $incident->statut === 'fermer';
     $isEdit   = isset($incident);
     $ro       = $isFerme ? 'readonly' : '';
     $dis      = $isFerme ? 'disabled' : '';
 @endphp
+
 
 @if($errors->any())
     <div class="alert alert-danger mb-4">
@@ -39,13 +44,16 @@
     </div>
 @endif
 
+
 @if($isFerme)
     <div class="alert alert-warning mb-4">
         Incident <strong>fermé</strong> — seul le statut peut être modifié.
     </div>
 @endif
 
+
 <div class="row g-3">
+
 
     {{-- DISCIPLINE --}}
     <div class="col-md-6">
@@ -68,6 +76,7 @@
         @enderror
     </div>
 
+
     {{-- SYSTÈME --}}
     <div class="col-md-6">
         <label class="form-label">Système</label>
@@ -76,6 +85,7 @@
                {{ $ro }}>
     </div>
 
+
     {{-- LOT DE TRAVAIL --}}
     <div class="col-md-6">
         <label class="form-label">Lot de travail</label>
@@ -83,6 +93,7 @@
                value="{{ old('lot_travail', $incident->lot_travail ?? '') }}"
                {{ $ro }}>
     </div>
+
 
     {{-- ZONE --}}
     <div class="col-md-6">
@@ -101,6 +112,7 @@
         </div>
     </div>
 
+
     {{-- ÉTIQUETTE --}}
     <div class="col-md-6">
         <label class="form-label">Étiquette</label>
@@ -108,6 +120,7 @@
                value="{{ old('etiquette', $incident->etiquette ?? '') }}"
                {{ $ro }}>
     </div>
+
 
     {{-- CATÉGORIE --}}
     <div class="col-md-6">
@@ -123,6 +136,7 @@
         </select>
     </div>
 
+
     {{-- INTERNE --}}
     <div class="col-md-6">
         <label class="form-label">Interne</label>
@@ -131,6 +145,7 @@
                {{ $ro }}>
     </div>
 
+
     {{-- RESPONSABILITÉ --}}
     <div class="col-md-6">
         <label class="form-label">Responsabilité</label>
@@ -138,6 +153,7 @@
                value="{{ old('responsabilite', $incident->responsabilite ?? '') }}"
                {{ $ro }}>
     </div>
+
 
     {{-- STATUT --}}
     <div class="col-md-6">
@@ -153,6 +169,7 @@
         </select>
     </div>
 
+
     {{-- CLÔTURE PRÉVUE --}}
     <div class="col-md-6">
         <label class="form-label">Clôture prévue</label>
@@ -162,6 +179,7 @@
                    : '') }}"
                {{ $ro }}>
     </div>
+
 
     {{-- DATE CLÔTURE auto (affichée si statut = fermer) --}}
     <div class="col-md-6" id="rowDateCloture" style="display:none">
@@ -177,6 +195,7 @@
                    : now()->toDateString() }}">
     </div>
 
+
     {{-- QFC OUVERT --}}
     <div class="col-md-6">
         <label class="form-label">QFC ouvert n°</label>
@@ -184,6 +203,7 @@
                value="{{ old('qfc_ouvert', $incident->qfc_ouvert ?? '') }}"
                {{ $ro }}>
     </div>
+
 
     {{-- QFC FERMÉ --}}
     <div class="col-md-6">
@@ -193,12 +213,14 @@
                {{ $ro }}>
     </div>
 
+
     {{-- DESCRIPTION --}}
     <div class="col-12">
         <label class="form-label">Description & remarques</label>
         <textarea name="description" rows="4" class="form-control"
                   {{ $ro }}>{{ old('description', $incident->description ?? '') }}</textarea>
     </div>
+
 
     {{-- ============================================================
          PHOTO OUVERTE
@@ -217,6 +239,7 @@
             </span>
         </label>
 
+
         {{-- Preview photo existante (mode edit) --}}
         @if($isEdit && !empty($incident->photo_ouverte))
             <div id="previewPhotoOuverte" class="mb-2">
@@ -233,12 +256,14 @@
             <div id="previewPhotoOuverte"></div>
         @endif
 
+
         {{-- Champ caché pour signaler la suppression au contrôleur --}}
         <input type="hidden" name="remove_photo_ouverte"
                id="removePhotoOuverte" value="0">
 
+
         {{-- Input fichier --}}
-        <input type="file"
+         <input type="file"
                name="photo_ouverte"
                id="inputPhotoOuverte"
                class="form-control @error('photo_ouverte') is-invalid @enderror"
@@ -263,6 +288,7 @@
             </span>
         </label>
 
+
         @if($isEdit && !empty($incident->photo_fermee))
             <div id="previewPhotoFermee" class="mb-2">
                 <img src="{{ asset('storage/'.$incident->photo_fermee) }}"
@@ -278,20 +304,24 @@
             <div id="previewPhotoFermee"></div>
         @endif
 
+
         <input type="hidden" name="remove_photo_fermee"
                id="removePhotoFermee" value="0">
+
 
         <input type="file"
                name="photo_fermee"
                id="inputPhotoFermee"
                class="form-control"
-               accept="image/*"
+       accept="image/*"
                {{ $ro }}
                onchange="previewImage(this, 'previewPhotoFermee', 'removePhotoFermee',
                                       'btnSupprimerFermee')">
     </div>
 
+
 </div>{{-- fin .row --}}
+
 
 <script>
 // ===== STATUT → affiche/masque date clôture =====
@@ -304,6 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sel) handleStatutChange(sel.value);
 });
 
+
 // ===== SUPPRIMER PHOTO =====
 // type = 'ouverte' | 'fermee'
 function supprimerPhoto(type) {
@@ -312,27 +343,33 @@ function supprimerPhoto(type) {
     const hidden   = document.getElementById('removePhoto'  + cap(type));
     const btn      = document.getElementById('btnSupprimer' + cap(type));
 
+
     // Masque preview + bouton supprimer
     if (preview) preview.innerHTML = '';
     if (btn)     btn.style.display = 'none';
 
+
     // Vide le file input
     if (input) input.value = '';
+
 
     // Si c'est la photo ouverte en mode création, la rendre obligatoire
     // (en edit on autorise la suppression + nouvelle upload)
     if (hidden) hidden.value = '1';
 }
 
+
 // ===== PREVIEW APRÈS SÉLECTION D'UN FICHIER =====
 function previewImage(input, previewId, hiddenId, btnId) {
     const file = input.files[0];
     if (!file) return;
 
+
     const reader = new FileReader();
     reader.onload = function (e) {
         const preview = document.getElementById(previewId);
         if (!preview) return;
+
 
         // Remplace ou crée l'image de preview
         let img = preview.querySelector('img');
@@ -346,14 +383,17 @@ function previewImage(input, previewId, hiddenId, btnId) {
     };
     reader.readAsDataURL(file);
 
+
     // Annule une éventuelle suppression précédente
     const hidden = document.getElementById(hiddenId);
     if (hidden) hidden.value = '0';
+
 
     // Ré-affiche le bouton supprimer si besoin
     const btn = document.getElementById(btnId);
     if (btn) btn.style.display = '';
 }
+
 
 // Capitalise la première lettre (helper)
 function cap(str) {

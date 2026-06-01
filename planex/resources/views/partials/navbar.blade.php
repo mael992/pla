@@ -6,33 +6,10 @@
             <img src="{{ asset('images/Planex.jpg') }}" alt="PlanEx">
         </a>
 
-        {{-- LIENS — visibles uniquement sur grand écran --}}
-        <ul class="nav-links nav-links-desktop">
-            <li><a href="{{ route('home') }}">Accueil</a></li>
-            <li><a href="{{ route('infos') }}">Infos</a></li>
-            <li><a href="#">Nouveautés</a></li>
-            <li><a href="#">Contact</a></li>
-            @auth
-                @if(auth()->user()->isAdmin() || auth()->user()->isIncident())
-                    <li>
-                        <a href="{{ route('dashboard') }}" class="nav-link-special">
-                            Tableau des anomalies
-                        </a>
-                    </li>
-                @endif
-            @endauth
-        </ul>
-
         {{-- ZONE AUTH --}}
         <div class="nav-auth">
 
             @auth
-                {{-- Bouton hamburger — visible uniquement sur mobile --}}
-                <button class="nav-hamburger" id="navHamburger"
-                        onclick="openNavMenu()" aria-label="Menu">
-                    ☰
-                </button>
-
                 <div class="nav-sep"></div>
 
                 <span class="user">
@@ -42,21 +19,16 @@
 
                 <div class="nav-sep"></div>
 
-                @if(auth()->user()->isAdmin())
-                    <a href="{{ route('users.index') }}" class="btn-nav-users">
-                        Gestion users
-                    </a>
-                    <div class="nav-sep"></div>
-                @endif
+                
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn-logout">Logout</button>
+                    <button type="submit" class="btn-logout">Déconnexion</button>
                 </form>
             @endauth
 
             @guest
-                <a href="{{ route('login') }}" class="btn-login">Login</a>
+                <a href="{{ route('login') }}" class="btn-login">Connexion</a>
             @endguest
 
         </div>
