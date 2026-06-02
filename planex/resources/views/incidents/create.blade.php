@@ -4,9 +4,9 @@
 <div class="container py-4" style="max-width: 900px;">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Nouvel incident</h1>
+        <h1 class="h3 mb-0">{{ __('messages.incident_new') }}</h1>
         <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">
-            ← Retour
+            {{ __('messages.btn_back') }}
         </a>
     </div>
 
@@ -17,8 +17,8 @@
                 @include('partials.form')
 
                 <div class="mt-4 pt-3 border-top d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Créer l'incident</button>
-                    <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">{{ __('messages.incident_create_btn') }}</button>
+                    <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">{{ __('messages.btn_cancel') }}</a>
                 </div>
             </form>
         </div>

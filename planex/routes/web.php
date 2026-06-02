@@ -4,12 +4,18 @@ use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\ChantierController;
 
 require __DIR__.'/auth.php';
+
+// LANGUE
+Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 // PUBLIC
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/infos', [PageController::class, 'infos'])->name('infos');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 
 // INCIDENTS (admin + incident)
 Route::middleware(['auth', 'incidents.access'])->group(function () {
@@ -17,9 +23,10 @@ Route::middleware(['auth', 'incidents.access'])->group(function () {
     Route::resource('incidents', IncidentController::class);
 });
 
-// USERS (admin ONLY)
+// USERS + CHANTIERS (admin ONLY)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('users', UserController::class);
+    Route::resource('chantiers', ChantierController::class);
 });
 
 // Zones (resource partiel : index, store, destroy uniquement)
@@ -31,7 +38,11 @@ Route::delete('/zones/{zone}',         [ZoneController::class, 'destroy'])->name
 Route::middleware(['auth', 'incidents.access'])->group(function () {
 
     Route::get('/poll-incidents', [IncidentController::class, 'poll'])
-    ->name('incidents.poll');
+        ->name('incidents.poll');
+    Route::get('/incidents-suggestions', [IncidentController::class, 'searchSuggestions'])
+        ->name('incidents.suggestions');
+    Route::get('/incidents-pdf', [IncidentController::class, 'exportPdf'])
+        ->name('incidents.pdf');
 
     Route::get('/dashboard', [IncidentController::class, 'index'])->name('dashboard');
 

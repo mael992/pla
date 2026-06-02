@@ -2,23 +2,123 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Chantier;
 use App\Models\Incident;
 use App\Models\Zone;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class IncidentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $incidents = Incident::with('zoneobj')->latest('id_incident')->get();
-        return view('incidents.index', compact('incidents'));
+        $query = Incident::with('zoneobj', 'chantier')->latest('id_incident');
+
+        // Filtre par chantier_id (sélection depuis suggestion)
+        if ($request->filled('chantier_id')) {
+            $query->where('chantier_id', $request->chantier_id);
+        }
+        // Filtre texte libre sur nom ou localité du chantier
+        elseif ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('chantier', function ($q) use ($search) {
+                $q->where('nom', 'like', "%{$search}%")
+                  ->orWhere('localite', 'like', "%{$search}%");
+            });
+        }
+
+        $incidents   = $query->get();
+        $activeSearch = $request->input('search', '');
+        $activeChantier = null;
+
+        if ($request->filled('chantier_id')) {
+            $activeChantier = Chantier::find($request->chantier_id);
+        }
+
+        return view('incidents.index', compact('incidents', 'activeSearch', 'activeChantier'));
+    }
+
+    /**
+     * Export PDF — tableau complet + stats par discipline
+     */
+    public function exportPdf(Request $request)
+    {
+        $query = Incident::with('zoneobj', 'chantier')->orderBy('id_incident');
+
+        $chantier = null;
+        if ($request->filled('chantier_id')) {
+            $chantier = Chantier::find($request->chantier_id);
+            $query->where('chantier_id', $request->chantier_id);
+        } elseif ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('chantier', fn($q) =>
+                $q->where('nom', 'like', "%{$search}%")->orWhere('localite', 'like', "%{$search}%")
+            );
+        }
+
+        $incidents = $query->get();
+
+        // ── Stats par discipline ──────────────────────────────
+        $statsByDiscipline = $incidents
+            ->whereNotNull('discipline')
+            ->groupBy('discipline')
+            ->map(fn($group) => [
+                'total'   => $group->count(),
+                'fermer'  => $group->where('statut', 'fermer')->count(),
+                'ouvert'  => $group->where('statut', 'ouvert')->count(),
+                'en_cours'=> $group->where('statut', 'en_cours')->count(),
+                'pct'     => $group->count() > 0
+                    ? round($group->where('statut', 'fermer')->count() / $group->count() * 100)
+                    : 0,
+            ])
+            ->sortByDesc('pct');
+
+        $globalTotal  = $incidents->count();
+        $globalClosed = $incidents->where('statut', 'fermer')->count();
+        $globalPct    = $globalTotal > 0 ? round($globalClosed / $globalTotal * 100) : 0;
+
+        $logoPath  = public_path('images/Planex.jpg');
+        $logoData  = file_exists($logoPath)
+            ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $pdf = Pdf::loadView('pdf.incidents', compact(
+            'incidents', 'chantier',
+            'statsByDiscipline', 'globalTotal', 'globalClosed', 'globalPct',
+            'logoData'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = 'anomalies_' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * AJAX — suggestions autocomplete (nom + localité chantier)
+     */
+    public function searchSuggestions(Request $request)
+    {
+        $q = $request->input('q', '');
+
+        if (strlen($q) < 1) {
+            return response()->json([]);
+        }
+
+        $chantiers = Chantier::where('nom', 'like', "%{$q}%")
+            ->orWhere('localite', 'like', "%{$q}%")
+            ->orderBy('nom')
+            ->limit(8)
+            ->get(['id', 'nom', 'localite']);
+
+        return response()->json($chantiers);
     }
 
     public function create()
     {
-        $zones = Zone::orderBy('name')->get();
-        return view('incidents.create', compact('zones'));
+        $zones     = Zone::orderBy('name')->get();
+        $chantiers = Chantier::orderBy('nom')->get();
+        return view('incidents.create', compact('zones', 'chantiers'));
     }
 
     public function store(Request $request)
@@ -36,7 +136,8 @@ class IncidentController extends Controller
         ]);
 
         $data = $request->except(['_token', 'date_cloture']);
-        $data['emis_par'] = auth()->user()->username;
+        $data['emis_par']  = auth()->user()->username;
+        $data['reference'] = Incident::generateReference();
 
         // Photo ouverte → date_emis auto
         if ($request->hasFile('photo_ouverte')) {
@@ -73,12 +174,13 @@ class IncidentController extends Controller
         return view('incidents.show', compact('incident'));
     }
 
-   public function edit($id)
+    public function edit($id)
     {
-        $incident = Incident::with('zoneobj')->findOrFail($id);
-        $zones    = Zone::orderBy('name')->get();
+        $incident  = Incident::with('zoneobj', 'chantier')->findOrFail($id);
+        $zones     = Zone::orderBy('name')->get();
+        $chantiers = Chantier::orderBy('nom')->get();
 
-        return view('incidents.edit', compact('incident', 'zones'));
+        return view('incidents.edit', compact('incident', 'zones', 'chantiers'));
     }
 
     public function update(Request $request, $id)
@@ -196,10 +298,18 @@ class IncidentController extends Controller
             Storage::disk('public')->delete($incident->photo_fermee);
         }
 
+        // Récupère l'année avant suppression pour renuméroter
+        $year = $incident->date_emis
+            ? (int) \Carbon\Carbon::parse($incident->date_emis)->year
+            : now()->year;
+
         $incident->delete();
 
+        // Renumérotation dense : comble le trou laissé par la suppression
+        Incident::renumberYear($year);
+
         return redirect()->route('incidents.index')
-            ->with('success', 'Incident supprimé.');
+            ->with('success', 'Anomalie supprimée — références renumérotées.');
     }
 
     /**

@@ -4,15 +4,17 @@
 <div class="container py-4" style="max-width: 900px;">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Modifier l'incident #{{ $incident->id_incident }}</h1>
+        <h1 class="h3 mb-0">
+            {{ __('messages.incident_edit_title', ['id' => $incident->reference ?? $incident->id_incident]) }}
+        </h1>
         <a href="{{ route('incidents.show', $incident->id_incident) }}" class="btn btn-outline-secondary">
-            ← Retour
+            {{ __('messages.btn_back') }}
         </a>
     </div>
 
     @if($incident->statut === 'fermer')
         <div class="alert alert-warning mb-4">
-            Cet incident est <strong>fermé</strong> et ne peut plus être modifié.
+            {!! __('messages.incident_closed_warning') !!}
         </div>
     @endif
 
@@ -26,10 +28,10 @@
                 <div class="mt-4 pt-3 border-top d-flex gap-2">
                     <button type="submit" class="btn btn-primary"
                             {{ $incident->statut === 'fermer' ? 'disabled' : '' }}>
-                        Enregistrer
+                        {{ __('messages.incident_save_btn') }}
                     </button>
                     <a href="{{ route('incidents.show', $incident->id_incident) }}"
-                       class="btn btn-outline-secondary">Annuler</a>
+                       class="btn btn-outline-secondary">{{ __('messages.btn_cancel') }}</a>
                 </div>
             </form>
         </div>

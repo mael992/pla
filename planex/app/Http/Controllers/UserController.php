@@ -23,14 +23,16 @@ class UserController extends Controller
     {
         $request->validate([
             'username' => 'required|unique:users',
+            'email' => 'nullable|email|unique:users',
             'password' => 'required|min:4',
-            'role' => 'required'
+            'role' => 'required',
         ]);
 
         User::create([
             'username' => $request->username,
+            'email' => $request->email ?: null,
             'password' => Hash::make($request->password),
-            'role' => $request->role
+            'role' => $request->role,
         ]);
 
         return redirect()->route('users.index');
@@ -46,7 +48,14 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        $request->validate([
+            'username' => 'required|unique:users,username,' . $id,
+            'email' => 'nullable|email|unique:users,email,' . $id,
+            'role' => 'required',
+        ]);
+
         $user->username = $request->username;
+        $user->email = $request->email ?: null;
         $user->role = $request->role;
 
         if ($request->password) {

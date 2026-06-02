@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\xampp\\\\htdocs\\\\planex\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs grep -l \"username\")",
+      "Bash(php artisan *)",
+      "Bash(dir C:\\\\xampp\\\\htdocs\\\\planex\\\\lang)",
+      "Bash(dir C:\\\\xampp\\\\htdocs\\\\planex\\\\resources\\\\views)",
+      "Bash(php -r \"echo file_get_contents\\('C:/xampp/htdocs/planex/config/app.php'\\);\")",
+      "Bash(php -l C:/xampp/htdocs/planex/resources/views/partials/navbar.blade.php)",
+      "Bash(php -l C:/xampp/htdocs/planex/public/css/app.css)"
+    ]
+  }
+}

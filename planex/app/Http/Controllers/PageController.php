@@ -11,6 +11,10 @@ class PageController extends Controller
     }
 
     public function infos() {
-        return view('infos'); // resources/views/infos.blade.php
+        return view('infos');
+    }
+
+    public function contact() {
+        return view('contact');
     }
 }

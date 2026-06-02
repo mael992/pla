@@ -1,3 +1,3 @@
 <footer class="footer">
-    <p>© {{ date('Y') }} PlanEx - Tous droits réservés</p>
+    <p>{!! __('messages.footer_rights', ['year' => date('Y')]) !!}</p>
 </footer>

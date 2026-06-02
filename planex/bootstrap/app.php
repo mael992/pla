@@ -10,15 +10,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function ($middleware) {
-    $middleware->alias([
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'incident' => \App\Http\Middleware\IncidentMiddleware::class,
-        'incidents.access' => \App\Http\Middleware\CanAccessIncidents::class,
-    ]);
-    })
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'admin'            => \App\Http\Middleware\AdminMiddleware::class,
+            'incident'         => \App\Http\Middleware\IncidentMiddleware::class,
+            'incidents.access' => \App\Http\Middleware\CanAccessIncidents::class,
+        ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

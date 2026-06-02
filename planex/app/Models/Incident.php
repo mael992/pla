@@ -2,26 +2,35 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasReference;
 use Illuminate\Database\Eloquent\Model;
 
 class Incident extends Model
 {
+    use HasReference;
+
     protected $primaryKey = 'id_incident';
     public $incrementing  = true;
     protected $keyType    = 'int';
     public $timestamps    = false;
 
     protected $fillable = [
+        'reference',
         'date_emis', 'photo_ouverte', 'photo_fermee', 'date_maj',
         'date_cloture', 'discipline', 'systeme', 'lot_travail',
-        'zone_id', 'etiquette', 'description', 'categorie',
+        'zone_id', 'chantier_id', 'etiquette', 'description', 'categorie',
         'interne', 'statut', 'responsabilite', 'emis_par',
         'qfc_ouvert', 'qfc_ferme', 'cloture_prevue',
     ];
 
-   public function zoneObj()
+    public function zoneObj()
     {
         return $this->belongsTo(Zone::class, 'zone_id', 'id');
+    }
+
+    public function chantier()
+    {
+        return $this->belongsTo(Chantier::class, 'chantier_id');
     }
 
     public const CATEGORIES = [

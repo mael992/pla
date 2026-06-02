@@ -13,7 +13,7 @@
 
         <!-- Username -->
         <div>
-            <x-input-label for="username" value="Nom d'utilisateur" />
+            <x-input-label for="username" :value="__('messages.auth_username')" />
 
             <x-text-input
                 id="username"
@@ -31,7 +31,7 @@
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" value="Mot de passe" />
+            <x-input-label for="password" :value="__('messages.auth_password')" />
 
             <x-text-input
                 id="password"
@@ -54,7 +54,7 @@
                        name="remember">
 
                 <span class="ms-2 text-sm text-gray-600">
-                    Se souvenir de moi
+                    {{ __('messages.auth_remember') }}
                 </span>
             </label>
         </div>
@@ -65,12 +65,12 @@
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900"
                    href="{{ route('password.request') }}">
-                    Mot de passe oublié ?
+                    {{ __('messages.auth_forgot_password') }}
                 </a>
             @endif
 
             <x-primary-button class="ms-3">
-                Connexion
+                {{ __('messages.auth_sign_in') }}
             </x-primary-button>
         </div>
 
