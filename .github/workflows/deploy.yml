@@ -35,6 +35,7 @@ jobs:
           ssh ssh.planex26.com "
             cd /var/www/planex &&
             git pull origin main &&
+            cd planex &&
             composer install --no-dev --optimize-autoloader &&
             php artisan migrate --force &&
             php artisan config:cache &&
