@@ -13,14 +13,15 @@ class CanAccessIncidents
      *
      * @param  Closure(Request): (Response)  $next
      */
-   public function handle($request, Closure $next)
+    public function handle($request, Closure $next)
     {
         if (!auth()->check()) {
-            abort(403);
+            return redirect()->route('login');
         }
 
         if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'incident') {
-            abort(403);
+            // Redirige vers la page tarifs avec un message
+            return redirect()->route('tarifs')->with('upgrade', true);
         }
 
         return $next($request);

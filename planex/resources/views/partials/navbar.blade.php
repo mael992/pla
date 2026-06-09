@@ -1,18 +1,23 @@
 @php
     $locale = app()->getLocale();
-    // code ISO 3166-1 alpha-2 pour flag-icons (gb pour anglais)
-    $flagCodes = ['fr' => 'fr', 'en' => 'gb', 'it' => 'it', 'es' => 'es'];
-    // Libellés affichés dans le bouton trigger (EN pas GB)
+    $flagCodes  = ['fr' => 'fr', 'en' => 'gb', 'it' => 'it', 'es' => 'es'];
     $langLabels = ['fr' => 'FR', 'en' => 'EN', 'it' => 'IT', 'es' => 'ES'];
     $langNames  = ['fr' => 'Français', 'en' => 'English', 'it' => 'Italiano', 'es' => 'Español'];
 
+    $hasAccess  = auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isIncident());
+    $isLoggedIn = auth()->check();
+    $isUser     = $isLoggedIn && auth()->user()->role === 'user';
+
+    // Lien tableau : dashboard si accès, tarifs sinon
+    $tableauHref = $hasAccess ? route('dashboard') : route('tarifs');
+
     $tableauLinks = [
-        ['label' => __('messages.nav_dashboard'),        'route' => 'dashboard', 'featured' => true ],
-        ['label' => __('messages.nav_tab_engineering'),  'route' => null,        'featured' => false],
-        ['label' => __('messages.nav_tab_development'),  'route' => null,        'featured' => false],
-        ['label' => __('messages.nav_tab_precom'),       'route' => null,        'featured' => false],
-        ['label' => __('messages.nav_tab_operations'),   'route' => null,        'featured' => false],
-        ['label' => __('messages.nav_tab_support'),      'route' => null,        'featured' => false],
+        ['label' => __('messages.nav_dashboard'),        'href' => $tableauHref,   'featured' => true ],
+        ['label' => __('messages.nav_tab_engineering'),  'href' => '#',            'featured' => false],
+        ['label' => __('messages.nav_tab_development'),  'href' => '#',            'featured' => false],
+        ['label' => __('messages.nav_tab_precom'),       'href' => '#',            'featured' => false],
+        ['label' => __('messages.nav_tab_operations'),   'href' => '#',            'featured' => false],
+        ['label' => __('messages.nav_tab_support'),      'href' => '#',            'featured' => false],
     ];
 @endphp
 
@@ -28,32 +33,33 @@
         <ul class="nav-links-desktop">
             <li><a href="{{ route('home') }}">{{ __('messages.nav_home') }}</a></li>
             <li><a href="{{ route('infos') }}">{{ __('messages.nav_infos') }}</a></li>
-            <li><a href="#">{{ __('messages.nav_news') }}</a></li>
+            <li><a href="{{ route('nouveautes') }}">{{ __('messages.nav_news') }}</a></li>
             <li><a href="{{ route('contact') }}">{{ __('messages.nav_contact') }}</a></li>
 
-            {{-- DROPDOWN "TABLEAU ANOMALIE" — géré en JS --}}
+            {{-- Dropdown tableau — visible uniquement si connecté --}}
+            @if($isLoggedIn)
             <li class="nav-dropdown" id="tableauDropdown">
-                <button class="nav-dropdown-trigger"
-                        type="button"
-                        onclick="toggleDropdown('tableauMenu')"
-                        aria-haspopup="true"
-                        aria-expanded="false">
+                <button class="nav-dropdown-trigger" type="button"
+                        onclick="toggleDropdown('tableauMenu')" aria-haspopup="true">
                     {{ __('messages.nav_tableau_label') }}
                     <span class="nav-dropdown-arrow" id="tableauArrow">▾</span>
                 </button>
                 <ul class="nav-dropdown-menu" id="tableauMenu">
                     @foreach($tableauLinks as $item)
-                        @if($item['featured'] && !auth()->check()) @continue @endif
                         <li>
-                            <a href="{{ $item['route'] ? route($item['route']) : '#' }}"
+                            <a href="{{ $item['href'] }}"
                                class="{{ $item['featured'] ? 'nav-dropdown-featured' : '' }}"
                                onclick="closeAllDropdowns()">
                                 {{ $item['label'] }}
+                                @if($item['featured'] && $isUser)
+                                    <span style="font-size:10px;margin-left:4px;opacity:0.7">🔒</span>
+                                @endif
                             </a>
                         </li>
                     @endforeach
                 </ul>
             </li>
+            @endif
         </ul>
 
         {{-- ZONE DROITE --}}
@@ -66,9 +72,23 @@
                         {{ auth()->user()->username }}
                     </span>
                     <div class="nav-sep"></div>
+                    @if($hasAccess)
+                        <a href="{{ route('chantiers.index') }}" class="btn-nav-users">
+                            {{ __('messages.nav_chantiers') }}
+                        </a>
+                        <div class="nav-sep"></div>
+                    @endif
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('users.index') }}" class="btn-nav-users">
                             {{ __('messages.nav_manage_users') }}
+                        </a>
+                        <div class="nav-sep"></div>
+                        <a href="{{ route('admin.tickets.index') }}" class="btn-nav-users">
+                            Messages
+                        </a>
+                        <div class="nav-sep"></div>
+                        <a href="{{ route('admin.logs.index') }}" class="btn-nav-users">
+                            Logs
                         </a>
                         <div class="nav-sep"></div>
                     @endif
@@ -82,17 +102,20 @@
 
             @guest
                 <div class="nav-desktop-auth">
+                    {{-- Bouton Acheter pour les visiteurs --}}
+                    <a href="{{ route('tarifs') }}" class="btn-buy">
+                        {{ __('messages.nav_buy') }}
+                    </a>
+                    <div class="nav-sep"></div>
                     <a href="{{ route('login') }}" class="btn-login">{{ __('messages.nav_login') }}</a>
                     <div class="nav-sep"></div>
                 </div>
             @endguest
 
-            {{-- SÉLECTEUR LANGUE --}}
+            {{-- LANGUE --}}
             <div class="lang-dropdown" id="langDropdown">
-                <button class="lang-dropdown-trigger"
-                        type="button"
-                        onclick="toggleDropdown('langMenu')"
-                        aria-haspopup="true">
+                <button class="lang-dropdown-trigger" type="button"
+                        onclick="toggleDropdown('langMenu')">
                     <span class="fi fi-{{ $flagCodes[$locale] ?? 'fr' }}"></span>
                     <span class="lang-code">{{ $langLabels[$locale] ?? 'FR' }}</span>
                     <span class="lang-arrow">▾</span>
@@ -112,7 +135,7 @@
                 </ul>
             </div>
 
-            {{-- HAMBURGER mobile --}}
+            {{-- HAMBURGER --}}
             <button class="nav-hamburger" onclick="openNavMenu()" aria-label="Menu">
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
@@ -144,26 +167,40 @@
     <nav class="nav-mobile-links">
         <a href="{{ route('home') }}"    onclick="closeNavMenu()"><span class="nav-mobile-icon">🏠</span>{{ __('messages.nav_home') }}</a>
         <a href="{{ route('infos') }}"   onclick="closeNavMenu()"><span class="nav-mobile-icon">ℹ️</span>{{ __('messages.nav_infos') }}</a>
-        <a href="#"                      onclick="closeNavMenu()"><span class="nav-mobile-icon">🆕</span>{{ __('messages.nav_news') }}</a>
+        <a href="{{ route('nouveautes') }}" onclick="closeNavMenu()"><span class="nav-mobile-icon">🆕</span>{{ __('messages.nav_news') }}</a>
         <a href="{{ route('contact') }}" onclick="closeNavMenu()"><span class="nav-mobile-icon">✉️</span>{{ __('messages.nav_contact') }}</a>
 
-        <div class="nav-mobile-divider"></div>
-        <div class="nav-mobile-section-label">{{ __('messages.nav_tableau_label') }}</div>
-        @foreach($tableauLinks as $item)
-            @if($item['featured'] && !auth()->check()) @continue @endif
-            <a href="{{ $item['route'] ? route($item['route']) : '#' }}"
-               onclick="closeNavMenu()"
-               class="{{ $item['featured'] ? 'nav-mobile-special' : '' }}"
-               style="{{ !$item['featured'] ? 'padding-left:32px;font-size:13px' : '' }}">
-                <span class="nav-mobile-icon">{{ $item['featured'] ? '📋' : '›' }}</span>{{ $item['label'] }}
-            </a>
-        @endforeach
+        {{-- Tableau anomalie — uniquement si connecté --}}
+        @if($isLoggedIn)
+            <div class="nav-mobile-divider"></div>
+            <div class="nav-mobile-section-label">{{ __('messages.nav_tableau_label') }}</div>
+            @foreach($tableauLinks as $item)
+                <a href="{{ $item['href'] }}" onclick="closeNavMenu()"
+                   class="{{ $item['featured'] ? 'nav-mobile-special' : '' }}"
+                   style="{{ !$item['featured'] ? 'padding-left:32px;font-size:13px' : '' }}">
+                    <span class="nav-mobile-icon">{{ $item['featured'] ? '📋' : '›' }}</span>
+                    {{ $item['label'] }}
+                    @if($item['featured'] && $isUser)<span style="font-size:11px;opacity:0.6"> 🔒</span>@endif
+                </a>
+            @endforeach
+        @endif
 
         @auth
-            @if(auth()->user()->isAdmin())
+            @if($hasAccess)
                 <div class="nav-mobile-divider"></div>
+                <a href="{{ route('chantiers.index') }}" onclick="closeNavMenu()">
+                    <span class="nav-mobile-icon">🏗️</span>{{ __('messages.nav_chantiers') }}
+                </a>
+            @endif
+            @if(auth()->user()->isAdmin())
                 <a href="{{ route('users.index') }}" onclick="closeNavMenu()">
                     <span class="nav-mobile-icon">👥</span>{{ __('messages.nav_manage_users') }}
+                </a>
+                <a href="{{ route('admin.tickets.index') }}" onclick="closeNavMenu()">
+                    <span class="nav-mobile-icon">✉️</span>Messages
+                </a>
+                <a href="{{ route('admin.logs.index') }}" onclick="closeNavMenu()">
+                    <span class="nav-mobile-icon">📋</span>Logs
                 </a>
             @endif
         @endauth
@@ -172,7 +209,7 @@
     <div class="nav-mobile-footer">
         <div class="nav-mobile-divider"></div>
 
-        {{-- Langue en pills avec drapeaux SVG --}}
+        {{-- Langue --}}
         <div class="nav-mobile-langs">
             @foreach($flagCodes as $code => $iso)
                 <a href="{{ route('lang.switch', $code) }}"
@@ -183,23 +220,28 @@
             @endforeach
         </div>
 
+        <div class="nav-mobile-divider"></div>
+
         @auth
-            <div class="nav-mobile-divider"></div>
-            <form method="POST" action="{{ route('logout') }}" style="padding:0 16px 16px">
+            <form method="POST" action="{{ route('logout') }}" style="padding:0 16px 10px">
                 @csrf
                 <button type="submit" class="btn-logout-mobile">{{ __('messages.nav_logout') }}</button>
             </form>
         @endauth
         @guest
-            <div style="padding:0 16px 16px">
-                <a href="{{ route('login') }}" class="btn-login-mobile">{{ __('messages.nav_login') }}</a>
+            <div style="padding:0 16px 8px">
+                <a href="{{ route('tarifs') }}" class="btn-login-mobile" style="background:#f59e0b;margin-bottom:8px;display:block">
+                    {{ __('messages.nav_buy') }}
+                </a>
+                <a href="{{ route('login') }}" class="btn-login-mobile">
+                    {{ __('messages.nav_login') }}
+                </a>
             </div>
         @endguest
     </div>
 </div>
 
 <script>
-/* ══ Drawer mobile ══ */
 function openNavMenu() {
     document.getElementById('navMobileMenu').classList.add('open');
     document.getElementById('navMobileOverlay').classList.add('show');
@@ -210,36 +252,26 @@ function closeNavMenu() {
     document.getElementById('navMobileOverlay').classList.remove('show');
     document.body.style.overflow = '';
 }
-
-/* ══ Dropdowns click (tableau + langue) ══ */
-const _dropdowns = ['tableauMenu', 'langMenu'];
-
+const _dropdowns = ['tableauMenu','langMenu'];
 function toggleDropdown(id) {
     const isOpen = document.getElementById(id).classList.contains('open');
     closeAllDropdowns();
     if (!isOpen) {
         document.getElementById(id).classList.add('open');
-        // Rotation de la flèche correspondante
-        const arrowId = id === 'tableauMenu' ? 'tableauArrow' : null;
-        if (arrowId) document.getElementById(arrowId).style.transform = 'rotate(180deg)';
+        if (id === 'tableauMenu') {
+            const arr = document.getElementById('tableauArrow');
+            if (arr) arr.style.transform = 'rotate(180deg)';
+        }
     }
 }
-
 function closeAllDropdowns() {
-    _dropdowns.forEach(id => {
-        document.getElementById(id)?.classList.remove('open');
-    });
+    _dropdowns.forEach(id => document.getElementById(id)?.classList.remove('open'));
     const arr = document.getElementById('tableauArrow');
     if (arr) arr.style.transform = '';
 }
-
-// Clic en dehors ferme tout
 document.addEventListener('click', e => {
-    const inNavbar = e.target.closest('.nav-dropdown, .lang-dropdown');
-    if (!inNavbar) closeAllDropdowns();
+    if (!e.target.closest('.nav-dropdown, .lang-dropdown')) closeAllDropdowns();
 });
-
-// Échap
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeAllDropdowns(); closeNavMenu(); }
 });

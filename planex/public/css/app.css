@@ -1559,3 +1559,98 @@ textarea {
     padding-left: 26px;
     margin-top: -4px;
 }
+
+/* ── Label section menu mobile (ex: "Tableau anomalie") ── */
+.nav-mobile-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.4);
+    padding: 10px 20px 4px;
+    display: block;
+}
+
+/* ══ PAGE TARIFS ══════════════════════════════════════════ */
+.pricing-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 28px 24px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 2px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.pricing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+.pricing-card--featured {
+    border-color: #f59e0b;
+    box-shadow: 0 6px 24px rgba(245,158,11,0.2);
+}
+.pricing-badge {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    align-self: center;
+}
+.pricing-icon { font-size: 2.5rem; }
+.pricing-features {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    flex: 1;
+}
+.pricing-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #374151;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #f9fafb;
+}
+.pricing-feature.pf-no { opacity: 0.4; text-decoration: line-through; }
+.pf-icon { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
+.pricing-btn {
+    display: block;
+    padding: 11px;
+    border-radius: 8px;
+    background: var(--dark);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.15s;
+}
+.pricing-btn:hover { background: #333; color: white; }
+.pricing-btn--gold { background: var(--brand); }
+.pricing-btn--gold:hover { background: var(--brand-dark); }
+
+/* ── Bouton Acheter navbar ── */
+.btn-buy {
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 5px;
+    background: #f59e0b;
+    color: white;
+    text-decoration: none;
+    border: none;
+    white-space: nowrap;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-buy:hover { background: #d97706; color: white; }

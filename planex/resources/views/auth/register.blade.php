@@ -23,8 +23,9 @@
             <x-text-input id="password" class="block mt-1 w-full"
                             type="password"
                             name="password"
-                            required autocomplete="new-password" />
+                            required autocomplete="new-password" minlength="8" />
 
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Minimum 8 caractères') }}</p>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 

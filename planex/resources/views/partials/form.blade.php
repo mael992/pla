@@ -238,17 +238,38 @@
         <input type="hidden" name="remove_photo_ouverte"
                id="removePhotoOuverte" value="0">
 
+        {{-- Input caméra (capture direct, contourne le Photo Picker Android) --}}
         <input type="file"
                name="photo_ouverte"
-               id="inputPhotoOuverte"
-               class="form-control @error('photo_ouverte') is-invalid @enderror"
+               id="inputPhotoOuverteCamera"
+               class="d-none @error('photo_ouverte') is-invalid @enderror"
                accept="image/*"
-               {{ !$isEdit ? 'required' : '' }}
-               {{ $ro }}
-               onchange="previewImage(this, 'previewPhotoOuverte', 'removePhotoOuverte',
-                                      'btnSupprimerOuverte')">
+               capture="environment"
+               onchange="syncPhoto(this, 'inputPhotoOuverteGalerie', 'previewPhotoOuverte', 'removePhotoOuverte', 'btnSupprimerOuverte')">
+
+        {{-- Input galerie --}}
+        <input type="file"
+               name="photo_ouverte"
+               id="inputPhotoOuverteGalerie"
+               class="d-none @error('photo_ouverte') is-invalid @enderror"
+               accept="image/*"
+               onchange="syncPhoto(this, 'inputPhotoOuverteCamera', 'previewPhotoOuverte', 'removePhotoOuverte', 'btnSupprimerOuverte')">
+
+        @if(!$isFerme)
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-primary btn-sm"
+                    onclick="document.getElementById('inputPhotoOuverteCamera').click()">
+                📷 {{ __('messages.photo_take') }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    onclick="document.getElementById('inputPhotoOuverteGalerie').click()">
+                🖼️ {{ __('messages.photo_gallery') }}
+            </button>
+        </div>
+        @endif
+
         @error('photo_ouverte')
-            <div class="invalid-feedback">{{ $message }}</div>
+            <div class="text-danger small mt-1">{{ $message }}</div>
         @enderror
     </div>
 
@@ -277,14 +298,35 @@
         <input type="hidden" name="remove_photo_fermee"
                id="removePhotoFermee" value="0">
 
+        {{-- Input caméra --}}
         <input type="file"
                name="photo_fermee"
-               id="inputPhotoFermee"
-               class="form-control"
+               id="inputPhotoFermeeCamera"
+               class="d-none"
                accept="image/*"
-               {{ $ro }}
-               onchange="previewImage(this, 'previewPhotoFermee', 'removePhotoFermee',
-                                      'btnSupprimerFermee')">
+               capture="environment"
+               onchange="syncPhoto(this, 'inputPhotoFermeeGalerie', 'previewPhotoFermee', 'removePhotoFermee', 'btnSupprimerFermee')">
+
+        {{-- Input galerie --}}
+        <input type="file"
+               name="photo_fermee"
+               id="inputPhotoFermeeGalerie"
+               class="d-none"
+               accept="image/*"
+               onchange="syncPhoto(this, 'inputPhotoFermeeCamera', 'previewPhotoFermee', 'removePhotoFermee', 'btnSupprimerFermee')">
+
+        @if(!$isFerme)
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-primary btn-sm"
+                    onclick="document.getElementById('inputPhotoFermeeCamera').click()">
+                📷 {{ __('messages.photo_take') }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    onclick="document.getElementById('inputPhotoFermeeGalerie').click()">
+                🖼️ {{ __('messages.photo_gallery') }}
+            </button>
+        </div>
+        @endif
     </div>
 
 </div>
@@ -300,21 +342,33 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function supprimerPhoto(type) {
-    const preview  = document.getElementById('previewPhoto' + cap(type));
-    const input    = document.getElementById('inputPhoto'   + cap(type));
-    const hidden   = document.getElementById('removePhoto'  + cap(type));
-    const btn      = document.getElementById('btnSupprimer' + cap(type));
+    const capType  = cap(type);
+    const preview  = document.getElementById('previewPhoto'         + capType);
+    const inputCam = document.getElementById('inputPhoto' + capType + 'Camera');
+    const inputGal = document.getElementById('inputPhoto' + capType + 'Galerie');
+    const hidden   = document.getElementById('removePhoto'          + capType);
+    const btn      = document.getElementById('btnSupprimer'         + capType);
 
-    if (preview) preview.innerHTML = '';
-    if (btn)     btn.style.display = 'none';
-    if (input) input.value = '';
-    if (hidden) hidden.value = '1';
+    if (preview)  preview.innerHTML = '';
+    if (btn)      btn.style.display = 'none';
+    if (inputCam) inputCam.value = '';
+    if (inputGal) inputGal.value = '';
+    if (hidden)   hidden.value = '1';
 }
 
-function previewImage(input, previewId, hiddenId, btnId) {
+/**
+ * Appelée quand un input (caméra ou galerie) reçoit un fichier.
+ * Affiche la prévisualisation et vide l'autre input (évite un double envoi).
+ */
+function syncPhoto(input, otherId, previewId, hiddenId, btnId) {
     const file = input.files[0];
     if (!file) return;
 
+    // Vider l'autre input pour ne pas envoyer deux fichiers
+    const other = document.getElementById(otherId);
+    if (other) other.value = '';
+
+    // Prévisualisation
     const reader = new FileReader();
     reader.onload = function (e) {
         const preview = document.getElementById(previewId);

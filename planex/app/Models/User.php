@@ -15,6 +15,9 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
+        'temp_password',
+        'temp_password_expires_at',
+        'must_change_password',
         'role',
     ];
 
@@ -26,8 +29,17 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
+            'password'                 => 'hashed',
+            'temp_password_expires_at' => 'datetime',
+            'must_change_password'     => 'boolean',
         ];
+    }
+
+    /** Le mot de passe provisoire a-t-il expiré ? */
+    public function tempPasswordExpired(): bool
+    {
+        return $this->temp_password_expires_at !== null
+            && $this->temp_password_expires_at->isPast();
     }
 
     public function isAdmin()
@@ -38,5 +50,12 @@ class User extends Authenticatable
     public function isIncident()
     {
         return $this->role === 'incident';
+    }
+
+    public function chantiers()
+    {
+        return $this->belongsToMany(Chantier::class, 'chantier_user')
+                    ->withPivot('role_chantier', 'is_creator')
+                    ->withTimestamps();
     }
 }

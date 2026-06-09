@@ -11,25 +11,25 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Gestion des zones</h1>
+        <h1 class="h3 mb-0">{{ __('messages.zones_title') }}</h1>
         <a href="{{ route('incidents.index') }}" class="btn btn-outline-secondary">
-            ← Retour
+            {{ __('messages.btn_back') }}
         </a>
     </div>
 
     {{-- Formulaire ajout --}}
     <div class="card shadow-sm mb-4">
-        <div class="card-header">Ajouter une zone</div>
+        <div class="card-header">{{ __('messages.zone_add_section') }}</div>
         <div class="card-body">
             <form action="{{ route('zones.store') }}" method="POST">
                 @csrf
                 <div class="d-flex gap-2">
                     <input type="text" name="name"
                            class="form-control @error('name') is-invalid @enderror"
-                           placeholder="Nom de la zone"
+                           placeholder="{{ __('messages.zone_name') }}"
                            value="{{ old('name') }}">
                     <button type="submit" class="btn btn-primary" style="white-space:nowrap">
-                        + Ajouter
+                        {{ __('messages.btn_add') }}
                     </button>
                 </div>
                 @error('name')
@@ -41,24 +41,24 @@
 
     {{-- Liste --}}
     <div class="card shadow-sm">
-        <div class="card-header">Zones existantes</div>
+        <div class="card-header">{{ __('messages.zone_existing') }}</div>
         <ul class="list-group list-group-flush">
             @forelse($zones as $zone)
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ $zone->name }}</span>
                 <form action="{{ route('zones.destroy', $zone->id) }}"
                       method="POST"
-                      onsubmit="return confirm('Supprimer la zone « {{ $zone->name }} » ?')">
+                      onsubmit="return confirm('{{ __('messages.zone_confirm_delete', ['name' => $zone->name]) }}')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-outline-danger">
-                        Supprimer
+                        {{ __('messages.btn_delete') }}
                     </button>
                 </form>
             </li>
             @empty
             <li class="list-group-item text-muted text-center py-4">
-                Aucune zone définie.
+                {{ __('messages.zone_none') }}
             </li>
             @endforelse
         </ul>

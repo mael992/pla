@@ -28,7 +28,8 @@
                 <br><br>
 
                 <label>{{ __('messages.user_password') }}</label>
-                <input type="password" name="password" required>
+                <input type="password" name="password" required minlength="8">
+                <small style="color:gray">{{ __('Minimum 8 caractères') }}</small>
                 @error('password') <span style="color:red">{{ $message }}</span> @enderror
 
                 <br><br>

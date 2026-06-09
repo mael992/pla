@@ -1,78 +1,108 @@
 <x-guest-layout>
 
-    <!-- Logo PlanEx -->
-    <div class="flex justify-center mb-6">
-        <img src="{{ asset('images/Planex.jpg') }}" alt="PlanEx" class="login-logo">
-    </div>
+    {{-- Message de statut (ex: lien mot de passe envoyé) --}}
+    @if(session('status'))
+        <div class="alert alert-success py-2 px-3 mb-3" style="font-size:13px;">
+            {{ session('status') }}
+        </div>
+    @endif
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    {{-- Erreur mot de passe temporaire expiré --}}
+    @if(session('error') === 'temp_password_expired')
+        <div class="alert alert-danger py-2 px-3 mb-3" style="font-size:13px;">
+            ⚠️ Votre mot de passe temporaire a expiré (48h). Contactez un administrateur.
+        </div>
+    @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    {{-- Erreurs globales --}}
+    @if($errors->any())
+        <div class="alert alert-danger py-2 px-3 mb-3" style="font-size:13px;">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
 
-        <!-- Username -->
-        <div>
-            <x-input-label for="username" :value="__('messages.auth_username')" />
-
-            <x-text-input
-                id="username"
-                class="block mt-1 w-full"
+        {{-- Identifiant --}}
+        <div class="mb-3">
+            <label for="username" class="form-label fw-semibold" style="font-size:13px;">
+                {{ __('messages.auth_username') }}
+            </label>
+            <input
                 type="text"
+                id="username"
                 name="username"
-                :value="old('username')"
+                class="form-control @error('username') is-invalid @enderror"
+                value="{{ old('username') }}"
                 required
                 autofocus
                 autocomplete="username"
-            />
-
-            <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                placeholder="Votre identifiant"
+            >
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('messages.auth_password')" />
-
-            <x-text-input
-                id="password"
-                class="block mt-1 w-full"
-                type="password"
-                name="password"
-                required
-                autocomplete="current-password"
-            />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me"
-                       type="checkbox"
-                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                       name="remember">
-
-                <span class="ms-2 text-sm text-gray-600">
-                    {{ __('messages.auth_remember') }}
-                </span>
+        {{-- Mot de passe --}}
+        <div class="mb-3">
+            <label for="password" class="form-label fw-semibold" style="font-size:13px;">
+                {{ __('messages.auth_password') }}
             </label>
+            <div class="input-group">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control @error('password') is-invalid @enderror"
+                    required
+                    autocomplete="current-password"
+                    placeholder="••••••••"
+                >
+                <button type="button" class="btn btn-outline-secondary" tabindex="-1"
+                        onclick="togglePwd()" title="Afficher/Masquer">
+                    <span id="eyeIcon">👁</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Actions -->
-        <div class="flex items-center justify-end mt-4">
-
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900"
-                   href="{{ route('password.request') }}">
-                    {{ __('messages.auth_forgot_password') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('messages.auth_sign_in') }}
-            </x-primary-button>
+        {{-- Se souvenir de moi --}}
+        <div class="mb-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember_me">
+                <label class="form-check-label" for="remember_me" style="font-size:13px;color:#555;">
+                    {{ __('messages.auth_remember') }}
+                </label>
+            </div>
         </div>
+
+        {{-- Bouton connexion --}}
+        <button type="submit" class="btn w-100 fw-semibold py-2"
+                style="background:var(--brand);color:#fff;border:none;border-radius:var(--radius);font-size:15px;letter-spacing:.01em;transition:background .2s;"
+                onmouseover="this.style.background='var(--brand-dark)'"
+                onmouseout="this.style.background='var(--brand)'">
+            {{ __('messages.auth_sign_in') }}
+        </button>
+
+        {{-- Mot de passe oublié --}}
+        @if(Route::has('password.request'))
+        <div class="text-center mt-3">
+            <a href="{{ route('password.request') }}"
+               style="font-size:12px;color:#888;text-decoration:none;">
+                {{ __('messages.auth_forgot_password') }}
+            </a>
+        </div>
+        @endif
 
     </form>
+
+    <script>
+    function togglePwd() {
+        const p = document.getElementById('password');
+        const e = document.getElementById('eyeIcon');
+        if (p.type === 'password') { p.type = 'text'; e.textContent = '🙈'; }
+        else { p.type = 'password'; e.textContent = '👁'; }
+    }
+    </script>
+
 </x-guest-layout>

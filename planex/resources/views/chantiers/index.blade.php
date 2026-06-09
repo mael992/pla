@@ -5,9 +5,14 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h1 class="h3 mb-0">{{ __('messages.chantiers_title') }}</h1>
-        <a href="{{ route('chantiers.create') }}" class="btn btn-primary">
-            {{ __('messages.chantier_new') }}
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+                {{ __('messages.btn_back') }}
+            </a>
+            <a href="{{ route('chantiers.create') }}" class="btn btn-primary">
+                {{ __('messages.chantier_new') }}
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

@@ -20,11 +20,9 @@
         <a href="{{ route('zones.index') }}" class="sidebar-link">
             <span class="sidebar-icon" style="font-size:16px">📍</span> {{ __('messages.sidebar_manage_zones') }}
         </a>
-        @if(auth()->user()->isAdmin())
         <a href="{{ route('chantiers.index') }}" class="sidebar-link">
             <span class="sidebar-icon" style="font-size:16px">🏗️</span> {{ __('messages.nav_chantiers') }}
         </a>
-        @endif
         <div class="sidebar-divider"></div>
         <a href="{{ route('incidents.create') }}" class="sidebar-cta">
             <span style="font-size:16px">💬</span> {{ __('messages.sidebar_add_incident') }}

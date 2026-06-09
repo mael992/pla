@@ -18,8 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\ForcePasswordChange::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Rediriger vers l'accueil en cas de CSRF expiré (419) au lieu d'afficher "Page Expired"
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            return redirect()->route('home')->with('info', 'Votre session a expiré. Veuillez vous reconnecter.');
+        });
     })->create();

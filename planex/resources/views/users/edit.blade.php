@@ -29,7 +29,9 @@
                 <br><br>
 
                 <label>{{ __('messages.user_password_optional') }}</label>
-                <input type="password" name="password">
+                <input type="password" name="password" minlength="8">
+                <small style="color:gray">{{ __('Minimum 8 caractères') }}</small>
+                @error('password') <span style="color:red">{{ $message }}</span> @enderror
 
                 <br><br>
 
