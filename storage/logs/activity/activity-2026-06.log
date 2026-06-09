@@ -1,0 +1,7 @@
+[2026-06-09 12:54:32] [AUTH] [LOGIN] Connexion réussie | Acteur: mael (id:5) | IP: ::1
+[2026-06-09 12:56:45] [AUTH] [LOGIN] Connexion réussie | Acteur: mael (id:5) | IP: ::1
+[2026-06-09 12:57:02] [AUTH] [LOGOUT] Déconnexion | Acteur: mael | IP: ::1
+[2026-06-09 12:57:53] [AUTH] [LOGIN] Connexion réussie | Acteur: mael (id:5) | IP: ::1
+[2026-06-09 12:58:20] [AUTH] [LOGOUT] Déconnexion | Acteur: mael | IP: ::1
+[2026-06-09 12:58:37] [AUTH] [LOGIN] Connexion réussie | Acteur: leam (id:6) | IP: ::1
+[2026-06-09 12:58:44] [AUTH] [LOGOUT] Déconnexion | Acteur: leam | IP: ::1

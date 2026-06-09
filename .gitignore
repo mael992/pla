@@ -1,0 +1,9 @@
+/node_modules
+/vendor
+/planex/node_modules
+/planex/vendor
+/planex/storage/framework/views/
+/planex/storage/framework/sessions/
+/planex/storage/app/public/
+/planex/.env
+.env
