@@ -34,8 +34,8 @@ jobs:
         run: |
           ssh ssh.planex26.com "
             cd /var/www/planex &&
-            git pull origin main &&
-            cd planex &&
+            git fetch origin main &&
+            git reset --hard origin/main &&
             composer install --no-dev --optimize-autoloader &&
             php artisan migrate --force &&
             php artisan config:cache &&
