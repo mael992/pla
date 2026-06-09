@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /var/www/ton-projet
+            cd /var/www/planex
             git pull origin main
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
