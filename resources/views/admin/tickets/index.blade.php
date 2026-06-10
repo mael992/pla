@@ -5,6 +5,8 @@
 @section('content')
 <div class="container py-4">
 
+    @include('admin.partials.tabs')
+
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h2 class="fw-bold mb-0" style="font-size:1.4rem;">Tickets de support</h2>
         <span class="badge bg-secondary">{{ $tickets->count() }} ticket(s)</span>

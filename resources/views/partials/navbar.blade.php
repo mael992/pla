@@ -81,16 +81,8 @@
                         <div class="nav-sep"></div>
                     @endif
                     @if(auth()->user()->isAdmin())
-                        <a href="{{ route('users.index') }}" class="btn-nav-users">
-                            {{ __('messages.nav_manage_users') }}
-                        </a>
-                        <div class="nav-sep"></div>
-                        <a href="{{ route('admin.tickets.index') }}" class="btn-nav-users">
-                            Messages
-                        </a>
-                        <div class="nav-sep"></div>
-                        <a href="{{ route('admin.logs.index') }}" class="btn-nav-users">
-                            Logs
+                        <a href="{{ route('admin.dashboard') }}" class="btn-nav-users">
+                            {{ __('Administration') }}
                         </a>
                         <div class="nav-sep"></div>
                     @endif
@@ -195,14 +187,8 @@
                 </a>
             @endif
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('users.index') }}" onclick="closeNavMenu()">
-                    <span class="nav-mobile-icon">👥</span>{{ __('messages.nav_manage_users') }}
-                </a>
-                <a href="{{ route('admin.tickets.index') }}" onclick="closeNavMenu()">
-                    <span class="nav-mobile-icon">✉️</span>Messages
-                </a>
-                <a href="{{ route('admin.logs.index') }}" onclick="closeNavMenu()">
-                    <span class="nav-mobile-icon">📋</span>Logs
+                <a href="{{ route('admin.dashboard') }}" onclick="closeNavMenu()">
+                    <span class="nav-mobile-icon">🛠️</span>{{ __('Administration') }}
                 </a>
             @endif
         @endauth

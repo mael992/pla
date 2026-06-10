@@ -4,6 +4,8 @@
 
 <div class="container-fluid px-3 px-md-4 py-4">
 
+    @include('admin.partials.tabs')
+
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h1 class="h3 mb-0">{{ __('messages.users_title') }}</h1>
         <a href="{{ route('users.create') }}" class="btn btn-primary">

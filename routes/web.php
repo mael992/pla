@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PageController;
@@ -38,6 +39,9 @@ Route::delete('/zones/{zone}', [ZoneController::class, 'destroy'])->name('zones.
 
 // ── ADMIN UNIQUEMENT ─────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Tableau d'administration unifié
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
     Route::resource('users', UserController::class);
     Route::get('/users/{user}/courrier', [UserController::class, 'courrier'])->name('users.courrier');
 

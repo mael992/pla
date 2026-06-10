@@ -5,6 +5,8 @@
 @section('content')
 <div class="container-fluid px-3 px-md-4 py-4">
 
+    @include('admin.partials.tabs')
+
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
             <h2 class="fw-bold mb-0" style="font-size:1.3rem;">📋 Logs d'activité</h2>
