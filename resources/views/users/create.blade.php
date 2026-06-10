@@ -15,11 +15,25 @@
             <form method="POST" action="{{ route('users.store') }}">
                 @csrf
 
-                <label>{{ __('messages.col_username') }}</label>
-                <input type="text" name="username" value="{{ old('username') }}" required>
-                @error('username') <span style="color:red">{{ $message }}</span> @enderror
+                <label>{{ __('Prénom') }}</label>
+                <input type="text" name="prenom" id="inputPrenom" value="{{ old('prenom') }}" required>
+                @error('prenom') <span style="color:red">{{ $message }}</span> @enderror
 
                 <br><br>
+
+                <label>{{ __('Nom') }}</label>
+                <input type="text" name="nom" id="inputNom" value="{{ old('nom') }}" required>
+                @error('nom') <span style="color:red">{{ $message }}</span> @enderror
+
+                <br><br>
+
+                <div style="background:#f1f5f9;border-radius:6px;padding:8px 12px;font-size:14px">
+                    {{ __('Identifiant généré') }} :
+                    <strong id="usernamePreview" style="color:#1e293b">—</strong>
+                    <small style="color:#64748b">{{ __('(+1 automatique si déjà pris)') }}</small>
+                </div>
+
+                <br>
 
                 <label>{{ __('messages.user_email_hint') }}</label>
                 <input type="email" name="email" value="{{ old('email') }}">
@@ -59,5 +73,25 @@
     </div>
 
 </div>
+
+<script>
+(function () {
+    const prenom  = document.getElementById('inputPrenom');
+    const nom     = document.getElementById('inputNom');
+    const preview = document.getElementById('usernamePreview');
+
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+
+    function update() {
+        const p = cap(prenom.value.trim());
+        const n = cap(nom.value.trim());
+        preview.textContent = (p && n) ? p + '.' + n : '—';
+    }
+
+    prenom.addEventListener('input', update);
+    nom.addEventListener('input', update);
+    update();
+})();
+</script>
 
 @endsection

@@ -58,4 +58,29 @@ class User extends Authenticatable
                     ->withPivot('role_chantier', 'is_creator')
                     ->withTimestamps();
     }
+
+    /**
+     * Génère un identifiant unique au format "Prénom.Nom".
+     * En cas de doublon, suffixe incrémental : Prénom.Nom1, Prénom.Nom2, ...
+     */
+    public static function generateUsername(string $prenom, string $nom): string
+    {
+        $cap = fn (string $s) => mb_strtoupper(mb_substr($s, 0, 1)) . mb_substr($s, 1);
+
+        $prenom = $cap(trim($prenom));
+        $nom    = $cap(trim($nom));
+
+        $base = $prenom . '.' . $nom;
+
+        if (!self::where('username', $base)->exists()) {
+            return $base;
+        }
+
+        $i = 1;
+        while (self::where('username', $base . $i)->exists()) {
+            $i++;
+        }
+
+        return $base . $i;
+    }
 }

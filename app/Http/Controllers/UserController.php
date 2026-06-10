@@ -28,16 +28,20 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|unique:users',
-            'email' => 'nullable|email|unique:users',
+            'prenom'   => 'required|string|max:255',
+            'nom'      => 'required|string|max:255',
+            'email'    => 'nullable|email|unique:users',
             'password' => 'required|min:8',
-            'role' => 'required',
+            'role'     => 'required',
         ]);
 
         $plainPassword = $request->password;
 
+        // Identifiant auto au format Prénom.Nom (+1 si doublon)
+        $username = User::generateUsername($request->prenom, $request->nom);
+
         $user = User::create([
-            'username'                 => $request->username,
+            'username'                 => $username,
             'email'                    => $request->email ?: null,
             'password'                 => Hash::make($plainPassword),
             'temp_password'            => $plainPassword,
