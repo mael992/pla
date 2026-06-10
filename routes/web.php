@@ -68,6 +68,7 @@ Route::middleware(['auth', 'incidents.access'])->group(function () {
 
     // Chantiers
     Route::resource('chantiers', ChantierController::class);
+    Route::get('/chantiers/{chantier}/members',         [ChantierController::class, 'members'])->name('chantiers.members');
     Route::post('/chantiers/{chantier}/users',          [ChantierController::class, 'addUser'])->name('chantiers.users.add');
     Route::put('/chantiers/{chantier}/users/{user}',    [ChantierController::class, 'updateUser'])->name('chantiers.users.update');
     Route::delete('/chantiers/{chantier}/users/{user}', [ChantierController::class, 'removeUser'])->name('chantiers.users.remove');

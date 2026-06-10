@@ -11,13 +11,15 @@
     // Lien tableau : dashboard si accès, tarifs sinon
     $tableauHref = $hasAccess ? route('dashboard') : route('tarifs');
 
+    $tabHref = $hasAccess ? route('dashboard') : route('tarifs');
+
     $tableauLinks = [
-        ['label' => __('messages.nav_dashboard'),        'href' => $tableauHref,   'featured' => true ],
-        ['label' => __('messages.nav_tab_engineering'),  'href' => '#',            'featured' => false],
-        ['label' => __('messages.nav_tab_development'),  'href' => '#',            'featured' => false],
-        ['label' => __('messages.nav_tab_precom'),       'href' => '#',            'featured' => false],
-        ['label' => __('messages.nav_tab_operations'),   'href' => '#',            'featured' => false],
-        ['label' => __('messages.nav_tab_support'),      'href' => '#',            'featured' => false],
+        ['label' => __('messages.nav_dashboard'),        'href' => $tableauHref, 'featured' => true ],
+        ['label' => __('messages.nav_tab_engineering'),  'href' => $tabHref,     'featured' => false],
+        ['label' => __('messages.nav_tab_development'),  'href' => $tabHref,     'featured' => false],
+        ['label' => __('messages.nav_tab_precom'),       'href' => $tabHref,     'featured' => false],
+        ['label' => __('messages.nav_tab_operations'),   'href' => $tabHref,     'featured' => false],
+        ['label' => __('messages.nav_tab_support'),      'href' => $tabHref,     'featured' => false],
     ];
 @endphp
 

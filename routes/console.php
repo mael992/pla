@@ -10,6 +10,10 @@ Artisan::command('inspire', function () {
 
 Schedule::command('tickets:cleanup')->daily();
 
+// ── Sauvegarde BDD ──────────────────────────────────────────────
+// Tous les jours à 02h30 (garde les 30 dernières)
+Schedule::command('db:backup')->dailyAt('02:30');
+
 // ── Logs d'activité ─────────────────────────────────────────────
 // Sauvegarde toutes les 48h (tous les 2 jours à 02:00)
 Schedule::command('logs:backup')->cron('0 2 */2 * *');

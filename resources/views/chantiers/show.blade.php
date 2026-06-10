@@ -185,7 +185,7 @@
                                 <select name="user_id" class="form-select form-select-sm" required>
                                     <option value="">{{ __('messages.chantier_member_search') }}</option>
                                     @foreach($allUsers as $u)
-                                        <option value="{{ $u->id }}">{{ $u->username }}{{ $u->email ? ' ('.$u->email.')' : '' }}</option>
+                                        <option value="{{ $u->id }}">{{ $u->username }}</option>
                                     @endforeach
                                 </select>
                             </div>

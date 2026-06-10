@@ -20,6 +20,9 @@
     $isEdit   = isset($incident);
     $ro       = $isFerme ? 'readonly' : '';
     $dis      = $isFerme ? 'disabled' : '';
+
+    $currentChantierIdForm = old('chantier_id', $incident->chantier_id ?? '');
+    $currentResponsabilite = old('responsabilite', $incident->responsabilite ?? '');
 @endphp
 
 @if($errors->any())
@@ -47,7 +50,7 @@
         </label>
         <select name="discipline"
                 class="form-select @error('discipline') is-invalid @enderror"
-                {{ $dis }}>
+                {{ $dis }} required>
             <option value="">{{ __('messages.select_placeholder') }}</option>
             @foreach($disciplines as $d)
                 <option value="{{ $d }}"
@@ -57,6 +60,48 @@
             @endforeach
         </select>
         @error('discipline')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    {{-- CHANTIER --}}
+    <div class="col-md-6">
+        <label class="form-label">
+            {{ __('messages.field_chantier') }} <span class="text-danger">*</span>
+        </label>
+        <select name="chantier_id" id="selectChantier"
+                class="form-select @error('chantier_id') is-invalid @enderror"
+                {{ $dis }} required>
+            <option value="">{{ __('messages.select_placeholder') }}</option>
+            @foreach($chantiers as $chantier)
+                <option value="{{ $chantier->id }}"
+                    {{ $currentChantierIdForm == $chantier->id ? 'selected' : '' }}>
+                    {{ $chantier->nom }} — {{ $chantier->localite }}
+                </option>
+            @endforeach
+        </select>
+        @error('chantier_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    {{-- RESPONSABILITÉ --}}
+    <div class="col-md-6">
+        <label class="form-label">
+            {{ __('messages.field_responsibility') }} <span class="text-danger">*</span>
+        </label>
+        <select name="responsabilite" id="selectResponsabilite"
+                class="form-select @error('responsabilite') is-invalid @enderror"
+                {{ $dis }} required>
+            <option value="">{{ __('messages.select_placeholder') }}</option>
+            @if($currentResponsabilite)
+                <option value="{{ $currentResponsabilite }}" selected>{{ $currentResponsabilite }}</option>
+            @endif
+        </select>
+        <div class="form-text" id="responsabiliteHint" style="display:none">
+            {{ __('messages.select_placeholder') }}
+        </div>
+        @error('responsabilite')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
@@ -94,23 +139,6 @@
         </div>
     </div>
 
-    {{-- CHANTIER --}}
-    <div class="col-md-6">
-        <label class="form-label">{{ __('messages.field_chantier') }}</label>
-        <select name="chantier_id" class="form-select" {{ $dis }}>
-            <option value="">{{ __('messages.select_placeholder') }}</option>
-            @foreach($chantiers as $chantier)
-                <option value="{{ $chantier->id }}"
-                    {{ old('chantier_id', $incident->chantier_id ?? '') == $chantier->id ? 'selected' : '' }}>
-                    {{ $chantier->nom }} — {{ $chantier->localite }}
-                </option>
-            @endforeach
-        </select>
-        <div class="form-text">
-            <a href="{{ route('chantiers.index') }}" target="_blank">{{ __('messages.chantiers_title') }}</a>
-        </div>
-    </div>
-
     {{-- ÉTIQUETTE --}}
     <div class="col-md-6">
         <label class="form-label">{{ __('messages.field_label') }}</label>
@@ -138,14 +166,6 @@
         <label class="form-label">{{ __('messages.field_internal') }}</label>
         <input type="text" name="interne" class="form-control"
                value="{{ old('interne', $incident->interne ?? '') }}"
-               {{ $ro }}>
-    </div>
-
-    {{-- RESPONSABILITÉ --}}
-    <div class="col-md-6">
-        <label class="form-label">{{ __('messages.field_responsibility') }}</label>
-        <input type="text" name="responsabilite" class="form-control"
-               value="{{ old('responsabilite', $incident->responsabilite ?? '') }}"
                {{ $ro }}>
     </div>
 
@@ -238,7 +258,6 @@
         <input type="hidden" name="remove_photo_ouverte"
                id="removePhotoOuverte" value="0">
 
-        {{-- Input caméra (capture direct, contourne le Photo Picker Android) --}}
         <input type="file"
                name="photo_ouverte"
                id="inputPhotoOuverteCamera"
@@ -247,7 +266,6 @@
                capture="environment"
                onchange="syncPhoto(this, 'inputPhotoOuverteGalerie', 'previewPhotoOuverte', 'removePhotoOuverte', 'btnSupprimerOuverte')">
 
-        {{-- Input galerie --}}
         <input type="file"
                name="photo_ouverte"
                id="inputPhotoOuverteGalerie"
@@ -298,7 +316,6 @@
         <input type="hidden" name="remove_photo_fermee"
                id="removePhotoFermee" value="0">
 
-        {{-- Input caméra --}}
         <input type="file"
                name="photo_fermee"
                id="inputPhotoFermeeCamera"
@@ -307,7 +324,6 @@
                capture="environment"
                onchange="syncPhoto(this, 'inputPhotoFermeeGalerie', 'previewPhotoFermee', 'removePhotoFermee', 'btnSupprimerFermee')">
 
-        {{-- Input galerie --}}
         <input type="file"
                name="photo_fermee"
                id="inputPhotoFermeeGalerie"
@@ -332,6 +348,52 @@
 </div>
 
 <script>
+const _membresUrl = '{{ url("/chantiers") }}';
+const _currentResponsabilite = @json($currentResponsabilite);
+
+async function loadMembers(chantierId, preserve) {
+    const sel = document.getElementById('selectResponsabilite');
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">{{ __("messages.select_placeholder") }}</option>';
+
+    if (!chantierId) return;
+
+    try {
+        const resp = await fetch(_membresUrl + '/' + chantierId + '/members');
+        const members = await resp.json();
+        members.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.username;
+            opt.textContent = m.username + ' (' + m.role_label + ')';
+            if (preserve && m.username === _currentResponsabilite) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        // Si la valeur courante n'est dans aucune option (valeur libre ancienne), l'ajouter
+        if (preserve && _currentResponsabilite && !members.find(m => m.username === _currentResponsabilite)) {
+            const opt = document.createElement('option');
+            opt.value = _currentResponsabilite;
+            opt.textContent = _currentResponsabilite;
+            opt.selected = true;
+            sel.appendChild(opt);
+        }
+    } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const chantierSel = document.getElementById('selectChantier');
+    if (!chantierSel) return;
+
+    chantierSel.addEventListener('change', function () {
+        loadMembers(this.value, false);
+    });
+
+    // Chargement initial (edition)
+    if (chantierSel.value) {
+        loadMembers(chantierSel.value, true);
+    }
+});
+
 function handleStatutChange(val) {
     document.getElementById('rowDateCloture').style.display =
         val === 'fermer' ? '' : 'none';
@@ -356,19 +418,13 @@ function supprimerPhoto(type) {
     if (hidden)   hidden.value = '1';
 }
 
-/**
- * Appelée quand un input (caméra ou galerie) reçoit un fichier.
- * Affiche la prévisualisation et vide l'autre input (évite un double envoi).
- */
 function syncPhoto(input, otherId, previewId, hiddenId, btnId) {
     const file = input.files[0];
     if (!file) return;
 
-    // Vider l'autre input pour ne pas envoyer deux fichiers
     const other = document.getElementById(otherId);
     if (other) other.value = '';
 
-    // Prévisualisation
     const reader = new FileReader();
     reader.onload = function (e) {
         const preview = document.getElementById(previewId);

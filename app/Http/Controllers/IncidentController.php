@@ -13,14 +13,18 @@ class IncidentController extends Controller
 {
     public function index(Request $request)
     {
+        $user  = auth()->user();
         $query = Incident::with('zoneobj', 'chantier')->latest('id_incident');
 
-        // Filtre par chantier_id (sélection depuis suggestion)
+        // Les non-admins ne voient que les incidents de leurs chantiers
+        if (!$user->isAdmin()) {
+            $myChantierIds = $user->chantiers()->pluck('chantiers.id');
+            $query->whereIn('chantier_id', $myChantierIds);
+        }
+
         if ($request->filled('chantier_id')) {
             $query->where('chantier_id', $request->chantier_id);
-        }
-        // Filtre texte libre sur nom ou localité du chantier
-        elseif ($request->filled('search')) {
+        } elseif ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('chantier', function ($q) use ($search) {
                 $q->where('nom', 'like', "%{$search}%")
@@ -28,13 +32,9 @@ class IncidentController extends Controller
             });
         }
 
-        $incidents   = $query->get();
-        $activeSearch = $request->input('search', '');
-        $activeChantier = null;
-
-        if ($request->filled('chantier_id')) {
-            $activeChantier = Chantier::find($request->chantier_id);
-        }
+        $incidents      = $query->get();
+        $activeSearch   = $request->input('search', '');
+        $activeChantier = $request->filled('chantier_id') ? Chantier::find($request->chantier_id) : null;
 
         return view('incidents.index', compact('incidents', 'activeSearch', 'activeChantier'));
     }
@@ -116,23 +116,28 @@ class IncidentController extends Controller
 
     public function create()
     {
+        $user      = auth()->user();
         $zones     = Zone::orderBy('name')->get();
-        $chantiers = Chantier::orderBy('nom')->get();
+        $chantiers = $user->isAdmin()
+            ? Chantier::orderBy('nom')->get()
+            : $user->chantiers()->orderBy('nom')->get();
         return view('incidents.create', compact('zones', 'chantiers'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'discipline'   => 'required',
-            'systeme'      => 'nullable',
-            'lot_travail'  => 'nullable',
-            'zone_id'      => 'nullable',
-            'description'  => 'nullable',
-            'categorie'    => 'nullable',
-            'statut'       => 'nullable',
-            'photo_ouverte'=> 'required|image|max:5120',
-            'photo_fermee' => 'nullable|image|max:5120',
+            'discipline'    => 'required',
+            'chantier_id'   => 'required|exists:chantiers,id',
+            'responsabilite'=> 'required|string|max:255',
+            'systeme'       => 'nullable',
+            'lot_travail'   => 'nullable',
+            'zone_id'       => 'nullable',
+            'description'   => 'nullable',
+            'categorie'     => 'nullable',
+            'statut'        => 'nullable',
+            'photo_ouverte' => 'required|image|max:5120',
+            'photo_fermee'  => 'nullable|image|max:5120',
         ]);
 
         $data = $request->except(['_token', 'date_cloture']);
@@ -166,19 +171,33 @@ class IncidentController extends Controller
             ->with('success', 'Incident créé avec succès.');
     }
 
-   public function show($id)
+    public function show($id)
     {
-        // with('zone') force le chargement de la relation
-        $incident = Incident::with('zoneobj')->findOrFail($id);
+        $user     = auth()->user();
+        $incident = Incident::with('zoneobj', 'chantier')->findOrFail($id);
+
+        if (!$user->isAdmin() && $incident->chantier_id) {
+            $myIds = $user->chantiers()->pluck('chantiers.id')->toArray();
+            if (!in_array($incident->chantier_id, $myIds)) abort(403);
+        }
 
         return view('incidents.show', compact('incident'));
     }
 
     public function edit($id)
     {
-        $incident  = Incident::with('zoneobj', 'chantier')->findOrFail($id);
+        $user     = auth()->user();
+        $incident = Incident::with('zoneobj', 'chantier')->findOrFail($id);
+
+        if (!$user->isAdmin() && $incident->chantier_id) {
+            $myIds = $user->chantiers()->pluck('chantiers.id')->toArray();
+            if (!in_array($incident->chantier_id, $myIds)) abort(403);
+        }
+
         $zones     = Zone::orderBy('name')->get();
-        $chantiers = Chantier::orderBy('nom')->get();
+        $chantiers = $user->isAdmin()
+            ? Chantier::orderBy('nom')->get()
+            : $user->chantiers()->orderBy('nom')->get();
 
         return view('incidents.edit', compact('incident', 'zones', 'chantiers'));
     }
@@ -211,15 +230,17 @@ class IncidentController extends Controller
     );
 
     $request->validate([
-        'discipline'    => 'required',
-        'systeme'       => 'nullable',
-        'lot_travail'   => 'nullable',
-        'zone_id'       => 'nullable',
-        'description'   => 'nullable',
-        'categorie'     => 'nullable',
-        'statut'        => 'nullable',
-        'photo_ouverte' => 'nullable|image|max:5120',
-        'photo_fermee'  => 'nullable|image|max:5120',
+        'discipline'     => 'required',
+        'chantier_id'    => 'required|exists:chantiers,id',
+        'responsabilite' => 'required|string|max:255',
+        'systeme'        => 'nullable',
+        'lot_travail'    => 'nullable',
+        'zone_id'        => 'nullable',
+        'description'    => 'nullable',
+        'categorie'      => 'nullable',
+        'statut'         => 'nullable',
+        'photo_ouverte'  => 'nullable|image|max:5120',
+        'photo_fermee'   => 'nullable|image|max:5120',
     ]);
 
     // Validation manuelle : photo ouverte obligatoire après modification

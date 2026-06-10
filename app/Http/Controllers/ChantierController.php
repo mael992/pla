@@ -201,6 +201,19 @@ class ChantierController extends Controller
         return back()->with('success', __('messages.chantier_user_removed'));
     }
 
+    // ── Membres d'un chantier (AJAX pour select responsabilité) ─
+    public function members(Chantier $chantier)
+    {
+        $members = $chantier->users()
+            ->get(['users.id', 'users.username', 'chantier_user.role_chantier'])
+            ->map(fn($u) => [
+                'username'   => $u->username,
+                'role_label' => Chantier::ROLES[$u->pivot->role_chantier] ?? $u->pivot->role_chantier,
+            ]);
+
+        return response()->json($members);
+    }
+
     // ── Peut voir le chantier (membre ou admin) ───────────────
     private function authorizeChantier(Chantier $chantier): void
     {
