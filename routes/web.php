@@ -79,6 +79,7 @@ Route::middleware(['auth', 'incidents.access'])->group(function () {
 
     // Dashboard & anomalies
     Route::get('/dashboard', [IncidentController::class, 'index'])->name('dashboard');
+    Route::view('/guide', 'guide')->name('guide');
     Route::resource('incidents', IncidentController::class);
 
     // Temps réel, suggestions, PDF

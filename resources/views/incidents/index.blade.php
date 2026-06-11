@@ -41,6 +41,17 @@
                 <span class="sidebar-pdf-filter">« {{ Str::limit($activeSearch, 14) }} »</span>
             @endif
         </a>
+
+        {{-- Bouton Guide — ouvre la page dédiée --}}
+        <a href="{{ route('guide') }}" class="sidebar-guide-btn"
+           style="display:flex;align-items:center;gap:10px;margin:0 20px 14px;padding:11px 16px;
+                  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);
+                  color:#cccccc;font-size:14px;font-weight:600;border-radius:8px;text-decoration:none;
+                  transition:background .15s,color .15s;"
+           onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.color='#fff';"
+           onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='#cccccc';">
+            <span style="font-size:16px">❓</span> {{ __('messages.guide_btn') }}
+        </a>
     </nav>
     <div class="sidebar-divider"></div>
     <div class="sidebar-footer">
