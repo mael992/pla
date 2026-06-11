@@ -518,6 +518,20 @@ if (mzSave) mzSave.addEventListener('click', function () {
     }).catch(e => { err.textContent = (e && e.message) || 'Erreur'; });
 });
 
+// Évite que l'input fichier VIDE (caméra ou galerie, même name) n'écrase
+// celui qui contient la photo : on désactive les inputs fichier vides avant
+// l'envoi (un input désactivé n'est pas soumis).
+(function () {
+    const ref = document.getElementById('inputPhotoOuverteCamera');
+    const form = ref ? ref.form : null;
+    if (!form) return;
+    form.addEventListener('submit', function () {
+        form.querySelectorAll('input[type=file]').forEach(function (inp) {
+            if (!inp.files || inp.files.length === 0) inp.disabled = true;
+        });
+    });
+})();
+
 function handleStatutChange(val) {
     document.getElementById('rowDateCloture').style.display =
         val === 'fermer' ? '' : 'none';
