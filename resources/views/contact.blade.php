@@ -78,8 +78,15 @@
                         {{-- Pièces jointes PDF --}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">{{ __('messages.contact_pdf_label') }} <span class="text-muted fw-normal">{{ __('messages.contact_optional2') }}</span></label>
-                            <input type="file" name="pdfs[]" class="form-control @error('pdfs.*') is-invalid @enderror"
-                                accept=".pdf,application/pdf" multiple>
+                            <input type="file" name="pdfs[]" id="pdfsInput" class="d-none @error('pdfs.*') is-invalid @enderror"
+                                accept=".pdf,application/pdf" multiple
+                                onchange="updateFileLabel(this, 'pdfsLabel')">
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('pdfsInput').click()">
+                                    📎 {{ __('messages.contact_browse') }}
+                                </button>
+                                <span class="form-control text-truncate" id="pdfsLabel">{{ __('messages.contact_no_file') }}</span>
+                            </div>
                             <div class="form-text">{{ __('messages.contact_pdf_formats') }}</div>
                             @error('pdfs.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
@@ -87,8 +94,15 @@
                         {{-- Pièces jointes images --}}
                         <div class="mb-4">
                             <label class="form-label fw-semibold">{{ __('messages.contact_img_label') }} <span class="text-muted fw-normal">{{ __('messages.contact_optional10') }}</span></label>
-                            <input type="file" name="images[]" class="form-control @error('images.*') is-invalid @enderror"
-                                accept="image/*" multiple>
+                            <input type="file" name="images[]" id="imagesInput" class="d-none @error('images.*') is-invalid @enderror"
+                                accept="image/*" multiple
+                                onchange="updateFileLabel(this, 'imagesLabel')">
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('imagesInput').click()">
+                                    🖼️ {{ __('messages.contact_browse') }}
+                                </button>
+                                <span class="form-control text-truncate" id="imagesLabel">{{ __('messages.contact_no_file') }}</span>
+                            </div>
                             <div class="form-text">{{ __('messages.contact_img_formats') }}</div>
                             @error('images.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
@@ -148,6 +162,21 @@ const subQuestions = {
 };
 const charsSuffix = @json(__('messages.contact_chars'));
 const selectPlaceholder = @json(__('messages.contact_select'));
+const noFileText = @json(__('messages.contact_no_file'));
+const filesCountText = @json(__('messages.contact_files_count'));
+
+function updateFileLabel(input, labelId) {
+    const label = document.getElementById(labelId);
+    if (!label) return;
+    const n = input.files.length;
+    if (n === 0) {
+        label.textContent = noFileText;
+    } else if (n === 1) {
+        label.textContent = input.files[0].name;
+    } else {
+        label.textContent = n + ' ' + filesCountText;
+    }
+}
 
 const q1        = document.getElementById('question_1');
 const q2        = document.getElementById('question_2');
