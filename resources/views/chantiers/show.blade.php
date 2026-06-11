@@ -102,6 +102,78 @@
         {{-- ── COLONNE DROITE : membres + anomalies ── --}}
         <div class="col-12 col-lg-7">
 
+            {{-- ── ENTREPRISES LIÉES AUX DISCIPLINES ── --}}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                    <span class="fw-semibold" style="font-size:13px">🏢 {{ __('messages.chantier_disciplines_title') }}</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" style="font-size:13px">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>{{ __('messages.field_discipline') }}</th>
+                                <th>{{ __('messages.chantier_discipline_name') }}</th>
+                                <th class="text-end">{{ __('messages.col_actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @forelse($disciplineOptions as $opt)
+                            <tr>
+                                <td><span class="fw-semibold">{{ $opt->label }}</span></td>
+                                <td>
+                                    @if(filled($opt->entreprise))
+                                        {{ $opt->entreprise }}
+                                    @else
+                                        <span class="text-warning" style="font-size:11px">⚠️ {{ __('messages.chantier_discipline_name') }}…</span>
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    @if($isChef)
+                                    <form action="{{ route('chantiers.disciplines.remove', [$chantier, $opt->id]) }}" method="POST"
+                                          onsubmit="return confirm('{{ $opt->label }} — {{ $opt->entreprise }} ?')">
+                                        @csrf @method('DELETE')
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">✕</button>
+                                    </form>
+                                    @else
+                                        <span class="text-muted" style="font-size:11px">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3" class="text-muted text-center py-3" style="font-size:12px">{{ __('messages.chantier_discipline_none') }}</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($isChef)
+                <div class="card-body border-top pt-3 pb-3">
+                    <p class="fw-semibold mb-2" style="font-size:13px">➕ {{ __('messages.chantier_discipline_add') }}</p>
+                    <form action="{{ route('chantiers.disciplines.add', $chantier) }}" method="POST">
+                        @csrf
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-sm-5">
+                                <label class="form-label" style="font-size:12px">{{ __('messages.field_discipline') }}</label>
+                                <select name="discipline" class="form-select form-select-sm" required>
+                                    @foreach(\App\Models\Chantier::DISCIPLINES as $key => $label)
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-5">
+                                <label class="form-label" style="font-size:12px">{{ __('messages.chantier_discipline_name') }}</label>
+                                <input type="text" name="entreprise" class="form-control form-control-sm" required maxlength="255">
+                            </div>
+                            <div class="col-12 col-sm-2">
+                                <button class="btn btn-primary btn-sm w-100" type="submit">{{ __('messages.btn_add') }}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                @endif
+            </div>
+
             {{-- ── MEMBRES ── --}}
             <div class="card shadow-sm mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center py-2">
@@ -114,6 +186,11 @@
                 @if(session('success'))
                     <div class="alert alert-success m-3 mb-0">{{ session('success') }}</div>
                 @endif
+
+                @php
+                    // Couples attribuables aux membres : uniquement ceux ayant une entreprise renseignée
+                    $memberCouples = $disciplineOptions->filter(fn($o) => filled($o->entreprise))->values();
+                @endphp
 
                 {{-- Liste membres --}}
                 <div class="table-responsive">
@@ -138,22 +215,31 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($isChef)
+                                    @php
+                                        $memberCouple = $coupleLabels[$member->pivot->chantier_discipline_id] ?? null;
+                                        $memberRoleLabel = $member->pivot->is_creator
+                                            ? \App\Models\Chantier::ROLES['chef_chantier']
+                                            : ($memberCouple->label ?? (\App\Models\Chantier::DISCIPLINES[$member->pivot->role_chantier] ?? $member->pivot->role_chantier));
+                                    @endphp
+                                    @if($isChef && !$member->pivot->is_creator && $memberCouples->isNotEmpty())
                                     <form action="{{ route('chantiers.users.update', [$chantier, $member]) }}" method="POST">
                                         @csrf @method('PUT')
                                         <div class="d-flex gap-1 align-items-center">
-                                            <select name="role_chantier" class="form-select form-select-sm" style="font-size:12px">
-                                                @foreach(\App\Models\Chantier::ROLES as $key => $label)
-                                                    <option value="{{ $key }}" {{ $member->pivot->role_chantier === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                            <select name="chantier_discipline_id" class="form-select form-select-sm" style="font-size:12px">
+                                                @foreach($memberCouples as $opt)
+                                                    <option value="{{ $opt->id }}" {{ $member->pivot->chantier_discipline_id == $opt->id ? 'selected' : '' }}>
+                                                        {{ $opt->label }}{{ $opt->entreprise ? ' — '.$opt->entreprise : '' }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             <button class="btn btn-outline-primary btn-sm" type="submit" title="{{ __('messages.btn_save') }}">✓</button>
                                         </div>
                                     </form>
                                     @else
-                                        <span class="badge bg-secondary" style="font-size:11px">
-                                            {{ \App\Models\Chantier::ROLES[$member->pivot->role_chantier] ?? $member->pivot->role_chantier }}
-                                        </span>
+                                        <span class="badge bg-secondary" style="font-size:11px">{{ $memberRoleLabel }}</span>
+                                        @if($memberCouple && $memberCouple->entreprise)
+                                            <div class="text-muted" style="font-size:11px">{{ $memberCouple->entreprise }}</div>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -177,6 +263,9 @@
                 @if($isChef && $allUsers->isNotEmpty())
                 <div class="card-body border-top pt-3 pb-3">
                     <p class="fw-semibold mb-2" style="font-size:13px">➕ {{ __('messages.chantier_add_member') }}</p>
+                    @if($memberCouples->isEmpty())
+                        <p class="text-warning mb-0" style="font-size:12px">⚠️ {{ __('messages.chantier_discipline_required_member') }}</p>
+                    @else
                     <form action="{{ route('chantiers.users.add', $chantier) }}" method="POST">
                         @csrf
                         <div class="row g-2 align-items-end">
@@ -191,9 +280,9 @@
                             </div>
                             <div class="col-12 col-sm-5">
                                 <label class="form-label" style="font-size:12px">{{ __('messages.chantier_role') }}</label>
-                                <select name="role_chantier" class="form-select form-select-sm" required>
-                                    @foreach(\App\Models\Chantier::ROLES as $key => $label)
-                                        <option value="{{ $key }}">{{ $label }}</option>
+                                <select name="chantier_discipline_id" class="form-select form-select-sm" required>
+                                    @foreach($memberCouples as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->label }}{{ $opt->entreprise ? ' — '.$opt->entreprise : '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -202,6 +291,7 @@
                             </div>
                         </div>
                     </form>
+                    @endif
                 </div>
                 @endif
             </div>

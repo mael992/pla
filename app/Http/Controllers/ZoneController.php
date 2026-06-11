@@ -19,7 +19,11 @@ class ZoneController extends Controller
             'name' => 'required|string|max:100|unique:zones,name',
         ]);
 
-        Zone::create(['name' => $request->name]);
+        $zone = Zone::create(['name' => $request->name]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['id' => $zone->id, 'name' => $zone->name]);
+        }
 
         return redirect()->route('zones.index')
             ->with('success', 'Zone ajoutée.');

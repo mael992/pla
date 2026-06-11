@@ -55,7 +55,7 @@ class User extends Authenticatable
     public function chantiers()
     {
         return $this->belongsToMany(Chantier::class, 'chantier_user')
-                    ->withPivot('role_chantier', 'is_creator')
+                    ->withPivot('role_chantier', 'is_creator', 'chantier_discipline_id')
                     ->withTimestamps();
     }
 

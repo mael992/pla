@@ -255,6 +255,19 @@ return [
     'user_search_placeholder'=>'Rechercher par identifiant, e-mail ou rôle...',
     'user_none'=>'Aucun utilisateur trouvé.',
 
+    // ── Entreprises liées aux disciplines
+    'chantier_disciplines_title'=>'Entreprises liées aux disciplines',
+    'chantier_discipline_add'=>'Ajouter une entreprise',
+    'chantier_discipline_name'=>"Nom de l'entreprise",
+    'chantier_discipline_added'=>'Entreprise ajoutée.',
+    'chantier_discipline_removed'=>'Entreprise retirée.',
+    'chantier_discipline_exists'=>'Cette entreprise est déjà liée à cette discipline.',
+    'chantier_discipline_none'=>'Aucune entreprise liée pour le moment.',
+    'chantier_discipline_required_member'=>"Ajoutez d'abord une entreprise pour pouvoir attribuer un membre.",
+    'modal_add_chantier'=>'Ajouter un chantier',
+    'modal_add_zone'=>'Ajouter une zone',
+    'form_pick_chantier_first'=>"Choisissez d'abord un chantier",
+
     // ── Contact
     'contact_title'=>'Bienvenue sur la page de contact de PlanEx',
     'contact_intro'=>'Vous avez une question, un problème ou une suggestion ? Remplissez le formulaire ci-dessous. Notre équipe vous répondra par e-mail dans les plus brefs délais.',

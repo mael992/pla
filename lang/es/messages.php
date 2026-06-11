@@ -253,6 +253,19 @@ return [
     'user_search_placeholder'=>'Buscar por usuario, correo o rol...',
     'user_none'=>'Ningún usuario encontrado.',
 
+    // ── Empresas vinculadas a las disciplinas
+    'chantier_disciplines_title'=>'Empresas vinculadas a las disciplinas',
+    'chantier_discipline_add'=>'Añadir una empresa',
+    'chantier_discipline_name'=>'Nombre de la empresa',
+    'chantier_discipline_added'=>'Empresa añadida.',
+    'chantier_discipline_removed'=>'Empresa eliminada.',
+    'chantier_discipline_exists'=>'Esta empresa ya está vinculada a esta disciplina.',
+    'chantier_discipline_none'=>'Ninguna empresa vinculada por ahora.',
+    'chantier_discipline_required_member'=>'Añada primero una empresa para poder asignar un miembro.',
+    'modal_add_chantier'=>'Añadir una obra',
+    'modal_add_zone'=>'Añadir una zona',
+    'form_pick_chantier_first'=>'Elija primero una obra',
+
     // ── Contact
     'contact_title'=>'Bienvenido a la página de contacto de PlanEx',
     'contact_intro'=>'¿Tiene una pregunta, un problema o una sugerencia? Rellene el formulario a continuación. Nuestro equipo le responderá por correo electrónico lo antes posible.',

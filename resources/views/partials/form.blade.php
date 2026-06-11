@@ -3,12 +3,6 @@
 @endisset
 
 @php
-    $disciplines = [
-        'VRD', 'Génie civil', 'Structure métallique', 'Structure bâtiment',
-        'Équipement', 'Tuyauterie', 'Calorifuge',
-        'Électricité', 'Instrumentation', 'Automatisme',
-    ];
-
     $statuts = [
         'na'       => __('messages.status_na'),
         'ouvert'   => __('messages.status_open'),
@@ -43,67 +37,61 @@
 
 <div class="row g-3">
 
-    {{-- DISCIPLINE --}}
-    <div class="col-md-6">
-        <label class="form-label">
-            {{ __('messages.field_discipline') }} <span class="text-danger">*</span>
-        </label>
-        <select name="discipline"
-                class="form-select @error('discipline') is-invalid @enderror"
-                {{ $dis }} required>
-            <option value="">{{ __('messages.select_placeholder') }}</option>
-            @foreach($disciplines as $d)
-                <option value="{{ $d }}"
-                    {{ old('discipline', $incident->discipline ?? '') === $d ? 'selected' : '' }}>
-                    {{ $d }}
-                </option>
-            @endforeach
-        </select>
-        @error('discipline')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
     {{-- CHANTIER --}}
     <div class="col-md-6">
         <label class="form-label">
             {{ __('messages.field_chantier') }} <span class="text-danger">*</span>
         </label>
-        <select name="chantier_id" id="selectChantier"
-                class="form-select @error('chantier_id') is-invalid @enderror"
-                {{ $dis }} required>
-            <option value="">{{ __('messages.select_placeholder') }}</option>
-            @foreach($chantiers as $chantier)
-                <option value="{{ $chantier->id }}"
-                    {{ $currentChantierIdForm == $chantier->id ? 'selected' : '' }}>
-                    {{ $chantier->nom }} — {{ $chantier->localite }}
-                </option>
-            @endforeach
-        </select>
-        @error('chantier_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
+        <div class="input-group">
+            <select name="chantier_id" id="selectChantier"
+                    class="form-select @error('chantier_id') is-invalid @enderror"
+                    {{ $dis }} required>
+                <option value="">{{ __('messages.select_placeholder') }}</option>
+                @foreach($chantiers as $chantier)
+                    <option value="{{ $chantier->id }}"
+                        {{ $currentChantierIdForm == $chantier->id ? 'selected' : '' }}>
+                        {{ $chantier->nom }} — {{ $chantier->localite }}
+                    </option>
+                @endforeach
+            </select>
+            @if(!$isFerme)
+            <button type="button" class="btn btn-outline-secondary" title="{{ __('messages.modal_add_chantier') }}"
+                    data-bs-toggle="modal" data-bs-target="#modalChantier">+</button>
+            @endif
+        </div>
+        @error('chantier_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
     </div>
 
-    {{-- RESPONSABILITÉ --}}
+    {{-- DISCIPLINE (dépend du chantier) --}}
+    <div class="col-md-6">
+        <label class="form-label">
+            {{ __('messages.field_discipline') }} <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <select id="selectDisciplineCouple"
+                    class="form-select @error('discipline') is-invalid @enderror"
+                    {{ $dis }} {{ $currentChantierIdForm ? '' : 'disabled' }}>
+                <option value="">{{ $currentChantierIdForm ? __('messages.select_placeholder') : __('messages.form_pick_chantier_first') }}</option>
+            </select>
+            @if(!$isFerme)
+            <button type="button" class="btn btn-outline-secondary" id="btnAddEntreprise" title="{{ __('messages.chantier_discipline_add') }}"
+                    data-bs-toggle="modal" data-bs-target="#modalEntreprise">+</button>
+            @endif
+        </div>
+        <input type="hidden" name="discipline" id="inputDiscipline"
+               value="{{ old('discipline', $incident->discipline ?? '') }}">
+        @error('discipline')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+    </div>
+
+    {{-- RESPONSABILITÉ (auto depuis l'entreprise du couple) --}}
     <div class="col-md-6">
         <label class="form-label">
             {{ __('messages.field_responsibility') }} <span class="text-danger">*</span>
         </label>
-        <select name="responsabilite" id="selectResponsabilite"
-                class="form-select @error('responsabilite') is-invalid @enderror"
-                {{ $dis }} required>
-            <option value="">{{ __('messages.select_placeholder') }}</option>
-            @if($currentResponsabilite)
-                <option value="{{ $currentResponsabilite }}" selected>{{ $currentResponsabilite }}</option>
-            @endif
-        </select>
-        <div class="form-text" id="responsabiliteHint" style="display:none">
-            {{ __('messages.select_placeholder') }}
-        </div>
-        @error('responsabilite')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
+        <input type="text" name="responsabilite" id="inputResponsabilite"
+               class="form-control @error('responsabilite') is-invalid @enderror"
+               value="{{ $currentResponsabilite }}" readonly required>
+        @error('responsabilite')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     {{-- SYSTÈME --}}
@@ -125,17 +113,20 @@
     {{-- ZONE --}}
     <div class="col-md-6">
         <label class="form-label">{{ __('messages.field_zone') }}</label>
-        <select name="zone_id" class="form-select" {{ $dis }}>
-            <option value="">{{ __('messages.select_placeholder') }}</option>
-            @foreach($zones as $zone)
-                <option value="{{ $zone->id }}"
-                    {{ old('zone_id', $incident->zone_id ?? '') == $zone->id ? 'selected' : '' }}>
-                    {{ $zone->name }}
-                </option>
-            @endforeach
-        </select>
-        <div class="form-text">
-            <a href="{{ route('zones.index') }}" target="_blank">{{ __('messages.form_manage_zones') }}</a>
+        <div class="input-group">
+            <select name="zone_id" id="selectZone" class="form-select" {{ $dis }}>
+                <option value="">{{ __('messages.select_placeholder') }}</option>
+                @foreach($zones as $zone)
+                    <option value="{{ $zone->id }}"
+                        {{ old('zone_id', $incident->zone_id ?? '') == $zone->id ? 'selected' : '' }}>
+                        {{ $zone->name }}
+                    </option>
+                @endforeach
+            </select>
+            @if(!$isFerme)
+            <button type="button" class="btn btn-outline-secondary" title="{{ __('messages.modal_add_zone') }}"
+                    data-bs-toggle="modal" data-bs-target="#modalZone">+</button>
+            @endif
         </div>
     </div>
 
@@ -347,51 +338,184 @@
 
 </div>
 
+@if(!$isFerme)
+{{-- ── MODALS d'ajout rapide ─────────────────────────────── --}}
+<div class="modal fade" id="modalChantier" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">{{ __('messages.modal_add_chantier') }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="mb-2"><label class="form-label">{{ __('messages.field_nom') }}</label>
+        <input type="text" id="mc_nom" class="form-control" maxlength="255"></div>
+      <div class="mb-2"><label class="form-label">{{ __('messages.field_localite') }}</label>
+        <input type="text" id="mc_loc" class="form-control" maxlength="255"></div>
+      <div class="text-danger small" id="mc_err"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.btn_back') }}</button>
+      <button type="button" class="btn btn-primary" id="mc_save">{{ __('messages.btn_add') }}</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="modalEntreprise" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">{{ __('messages.chantier_discipline_add') }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="mb-2"><label class="form-label">{{ __('messages.field_discipline') }}</label>
+        <select id="me_disc" class="form-select">
+          @foreach(\App\Models\Chantier::DISCIPLINES as $key => $label)
+            <option value="{{ $key }}">{{ $label }}</option>
+          @endforeach
+        </select></div>
+      <div class="mb-2"><label class="form-label">{{ __('messages.chantier_discipline_name') }}</label>
+        <input type="text" id="me_ent" class="form-control" maxlength="255"></div>
+      <div class="text-danger small" id="me_err"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.btn_back') }}</button>
+      <button type="button" class="btn btn-primary" id="me_save">{{ __('messages.btn_add') }}</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="modalZone" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">{{ __('messages.modal_add_zone') }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="mb-2"><label class="form-label">{{ __('messages.field_zone') }}</label>
+        <input type="text" id="mz_name" class="form-control" maxlength="100"></div>
+      <div class="text-danger small" id="mz_err"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('messages.btn_back') }}</button>
+      <button type="button" class="btn btn-primary" id="mz_save">{{ __('messages.btn_add') }}</button>
+    </div>
+  </div></div>
+</div>
+@endif
+
 <script>
-const _membresUrl = '{{ url("/chantiers") }}';
+const _baseUrl   = '{{ url("/chantiers") }}';
+const _zoneUrl   = '{{ route("zones.store") }}';
+const _csrf      = document.querySelector('input[name=_token]')?.value || '';
+const _placeholder       = @json(__('messages.select_placeholder'));
+const _currentDiscipline    = @json(old('discipline', $incident->discipline ?? ''));
 const _currentResponsabilite = @json($currentResponsabilite);
 
-async function loadMembers(chantierId, preserve) {
-    const sel = document.getElementById('selectResponsabilite');
-    if (!sel) return;
+const chantierSel    = document.getElementById('selectChantier');
+const dispSel        = document.getElementById('selectDisciplineCouple');
+const inputDiscipline = document.getElementById('inputDiscipline');
+const inputResp      = document.getElementById('inputResponsabilite');
 
-    sel.innerHTML = '<option value="">{{ __("messages.select_placeholder") }}</option>';
+function setFromSelect(isInitial) {
+    const opt = dispSel.options[dispSel.selectedIndex];
+    if (opt && opt.value) {
+        inputDiscipline.value = opt.dataset.discipline || '';
+        inputResp.value       = opt.dataset.entreprise || '';
+    } else if (!isInitial) {
+        inputDiscipline.value = '';
+        inputResp.value       = '';
+    }
+    // En édition sans correspondance : on conserve les valeurs déjà stockées.
+}
 
-    if (!chantierId) return;
-
+async function loadDisciplines(chantierId, isInitial, selectId) {
+    dispSel.innerHTML = '<option value="">' + _placeholder + '</option>';
+    dispSel.disabled = true;
+    if (!chantierId) { setFromSelect(isInitial); return; }
     try {
-        const resp = await fetch(_membresUrl + '/' + chantierId + '/members');
-        const members = await resp.json();
-        members.forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m.username;
-            opt.textContent = m.username + ' (' + m.role_label + ')';
-            if (preserve && m.username === _currentResponsabilite) opt.selected = true;
-            sel.appendChild(opt);
+        const r = await fetch(_baseUrl + '/' + chantierId + '/disciplines', { headers: { 'Accept': 'application/json' } });
+        const couples = await r.json();
+        couples.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c.id;
+            o.textContent = c.label + (c.entreprise ? ' — ' + c.entreprise : '');
+            o.dataset.discipline = c.discipline_label;
+            o.dataset.entreprise = c.entreprise || '';
+            dispSel.appendChild(o);
         });
-        // Si la valeur courante n'est dans aucune option (valeur libre ancienne), l'ajouter
-        if (preserve && _currentResponsabilite && !members.find(m => m.username === _currentResponsabilite)) {
-            const opt = document.createElement('option');
-            opt.value = _currentResponsabilite;
-            opt.textContent = _currentResponsabilite;
-            opt.selected = true;
-            sel.appendChild(opt);
+        dispSel.disabled = false;
+        if (selectId) {
+            dispSel.value = selectId;
+        } else if (isInitial && _currentDiscipline) {
+            const match = couples.find(c => c.discipline_label === _currentDiscipline
+                && (c.entreprise || '') === (_currentResponsabilite || ''));
+            if (match) dispSel.value = match.id;
         }
+        setFromSelect(isInitial && !selectId);
     } catch (e) {}
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const chantierSel = document.getElementById('selectChantier');
-    if (!chantierSel) return;
+if (chantierSel) {
+    chantierSel.addEventListener('change', function () { loadDisciplines(this.value, false); });
+    if (dispSel) dispSel.addEventListener('change', function () { setFromSelect(false); });
+    if (chantierSel.value) loadDisciplines(chantierSel.value, true);
+}
 
-    chantierSel.addEventListener('change', function () {
-        loadMembers(this.value, false);
-    });
+// ── Modals d'ajout rapide (chantier / entreprise / zone) ──────
+function _post(url, data) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest',
+                   'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(Object.assign({ _token: _csrf }, data))
+    }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)));
+}
+function _hide(id) {
+    const m = bootstrap.Modal.getInstance(document.getElementById(id));
+    if (m) m.hide();
+}
 
-    // Chargement initial (edition)
-    if (chantierSel.value) {
-        loadMembers(chantierSel.value, true);
-    }
+// Chantier
+const mcSave = document.getElementById('mc_save');
+if (mcSave) mcSave.addEventListener('click', function () {
+    const nom = document.getElementById('mc_nom').value.trim();
+    const loc = document.getElementById('mc_loc').value.trim();
+    const err = document.getElementById('mc_err'); err.textContent = '';
+    if (!nom || !loc) { err.textContent = '⚠️'; return; }
+    _post(_baseUrl, { nom: nom, localite: loc }).then(d => {
+        const o = document.createElement('option');
+        o.value = d.id; o.textContent = d.label; o.selected = true;
+        chantierSel.appendChild(o);
+        _hide('modalChantier');
+        document.getElementById('mc_nom').value = ''; document.getElementById('mc_loc').value = '';
+        loadDisciplines(d.id, false);
+    }).catch(e => { err.textContent = (e && e.message) || 'Erreur'; });
+});
+
+// Entreprise (couple discipline+entreprise sur le chantier sélectionné)
+const meSave = document.getElementById('me_save');
+if (meSave) meSave.addEventListener('click', function () {
+    const cid = chantierSel.value;
+    const err = document.getElementById('me_err'); err.textContent = '';
+    if (!cid) { err.textContent = @json(__('messages.form_pick_chantier_first')); return; }
+    const discipline = document.getElementById('me_disc').value;
+    const entreprise = document.getElementById('me_ent').value.trim();
+    if (!entreprise) { err.textContent = '⚠️'; return; }
+    _post(_baseUrl + '/' + cid + '/disciplines', { discipline: discipline, entreprise: entreprise }).then(d => {
+        _hide('modalEntreprise');
+        document.getElementById('me_ent').value = '';
+        loadDisciplines(cid, false, d.id);
+    }).catch(e => { err.textContent = (e && e.error) || 'Erreur'; });
+});
+
+// Zone
+const mzSave = document.getElementById('mz_save');
+if (mzSave) mzSave.addEventListener('click', function () {
+    const name = document.getElementById('mz_name').value.trim();
+    const err = document.getElementById('mz_err'); err.textContent = '';
+    if (!name) { err.textContent = '⚠️'; return; }
+    _post(_zoneUrl, { name: name }).then(d => {
+        const sel = document.getElementById('selectZone');
+        const o = document.createElement('option');
+        o.value = d.id; o.textContent = d.name; o.selected = true;
+        sel.appendChild(o);
+        _hide('modalZone');
+        document.getElementById('mz_name').value = '';
+    }).catch(e => { err.textContent = (e && e.message) || 'Erreur'; });
 });
 
 function handleStatutChange(val) {

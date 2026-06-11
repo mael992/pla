@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ChantierUserAdded;
 use App\Models\Chantier;
+use App\Models\ChantierDiscipline;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -55,6 +56,13 @@ class ChantierController extends Controller
             'is_creator'    => true,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'id'    => $chantier->id,
+                'label' => $chantier->nom . ' — ' . $chantier->localite,
+            ]);
+        }
+
         return redirect()->route('chantiers.index')
             ->with('success', __('messages.chantier_created'));
     }
@@ -67,6 +75,10 @@ class ChantierController extends Controller
         $incidents = $chantier->incidents()->with('zoneobj')->latest('id_incident')->get();
         $members   = $chantier->users()->get();
         $allUsers  = User::whereNotIn('id', $members->pluck('id'))->orderBy('username')->get();
+
+        // Couples discipline/entreprise + libellés numérotés (VRD 1, VRD 2…)
+        $disciplineOptions = $chantier->disciplineOptions();
+        $coupleLabels      = $disciplineOptions->keyBy('id');
 
         $statutColors = [
             'ouvert'   => ['label' => __('messages.status_open'),        'color' => '#ef4444'],
@@ -98,7 +110,8 @@ class ChantierController extends Controller
         return view('chantiers.show', compact(
             'chantier', 'incidents', 'members', 'allUsers',
             'chartLabels', 'chartData', 'chartColors', 'stats',
-            'globalTotal', 'globalClosed', 'globalPct', 'isChef'
+            'globalTotal', 'globalClosed', 'globalPct', 'isChef',
+            'disciplineOptions', 'coupleLabels'
         ));
     }
 
@@ -141,11 +154,15 @@ class ChantierController extends Controller
         $this->authorizeChef($chantier);
 
         $request->validate([
-            'user_id'       => 'required|exists:users,id',
-            'role_chantier' => ['required', 'string', Rule::in(array_keys(Chantier::ROLES))],
+            'user_id'                => 'required|exists:users,id',
+            'chantier_discipline_id' => [
+                'required',
+                Rule::exists('chantier_disciplines', 'id')->where('chantier_id', $chantier->id),
+            ],
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user    = User::findOrFail($request->user_id);
+        $couple  = $chantier->disciplines()->findOrFail($request->chantier_discipline_id);
 
         // Vérifier qu'il n'est pas déjà membre
         if ($chantier->users()->where('user_id', $user->id)->exists()) {
@@ -153,13 +170,14 @@ class ChantierController extends Controller
         }
 
         $chantier->users()->attach($user->id, [
-            'role_chantier' => $request->role_chantier,
-            'is_creator'    => false,
+            'role_chantier'          => $couple->discipline,
+            'chantier_discipline_id' => $couple->id,
+            'is_creator'             => false,
         ]);
 
         // Email de notification si l'user a un email
         if ($user->email) {
-            $roleLabel = Chantier::ROLES[$request->role_chantier] ?? $request->role_chantier;
+            $roleLabel = Chantier::DISCIPLINES[$couple->discipline] ?? $couple->discipline;
             try {
                 Mail::to($user->email)->send(new ChantierUserAdded($user, $chantier, $roleLabel));
             } catch (\Exception $e) {
@@ -176,12 +194,18 @@ class ChantierController extends Controller
         $this->authorizeChef($chantier);
 
         $request->validate([
-            'role_chantier' => ['required', Rule::in(array_keys(Chantier::ROLES))],
+            'chantier_discipline_id' => [
+                'required',
+                Rule::exists('chantier_disciplines', 'id')->where('chantier_id', $chantier->id),
+            ],
         ]);
+
+        $couple = $chantier->disciplines()->findOrFail($request->chantier_discipline_id);
 
         // Mise à jour du rôle — autorisé pour tout le monde (créateur ou non)
         $chantier->users()->updateExistingPivot($user->id, [
-            'role_chantier' => $request->role_chantier,
+            'role_chantier'          => $couple->discipline,
+            'chantier_discipline_id' => $couple->id,
         ]);
 
         return back()->with('success', __('messages.chantier_user_updated'));
@@ -201,17 +225,78 @@ class ChantierController extends Controller
         return back()->with('success', __('messages.chantier_user_removed'));
     }
 
-    // ── Membres d'un chantier (AJAX pour select responsabilité) ─
-    public function members(Chantier $chantier)
+    // ── Disciplines/entreprises d'un chantier (AJAX formulaire anomalie) ─
+    public function disciplinesJson(Chantier $chantier)
     {
-        $members = $chantier->users()
-            ->get(['users.id', 'users.username', 'chantier_user.role_chantier'])
-            ->map(fn($u) => [
-                'username'   => $u->username,
-                'role_label' => Chantier::ROLES[$u->pivot->role_chantier] ?? $u->pivot->role_chantier,
-            ]);
+        // Uniquement les couples avec une entreprise renseignée
+        $options = $chantier->disciplineOptions()
+            ->filter(fn($o) => filled($o->entreprise))
+            ->map(fn($o) => [
+                'id'               => $o->id,
+                'label'            => $o->label,
+                'discipline'       => $o->discipline,
+                'discipline_label' => $o->discipline_label,
+                'entreprise'       => $o->entreprise,
+            ])
+            ->values();
 
-        return response()->json($members);
+        return response()->json($options);
+    }
+
+    // ── Ajouter un couple discipline/entreprise ───────────────
+    public function addDiscipline(Request $request, Chantier $chantier)
+    {
+        $this->authorizeChef($chantier);
+
+        $request->validate([
+            'discipline' => ['required', Rule::in(array_keys(Chantier::DISCIPLINES))],
+            'entreprise' => ['required', 'string', 'max:255'],
+        ]);
+
+        // Éviter le doublon exact discipline + entreprise
+        $exists = $chantier->disciplines()
+            ->where('discipline', $request->discipline)
+            ->where('entreprise', $request->entreprise)
+            ->exists();
+
+        if ($exists) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => __('messages.chantier_discipline_exists')], 422);
+            }
+            return back()->withErrors(['entreprise' => __('messages.chantier_discipline_exists')]);
+        }
+
+        $couple = $chantier->disciplines()->create([
+            'discipline' => $request->discipline,
+            'entreprise' => $request->entreprise,
+        ]);
+
+        if ($request->expectsJson()) {
+            // Renvoyer le couple avec son libellé numéroté à jour
+            $opt = $chantier->disciplineOptions()->firstWhere('id', $couple->id);
+            return response()->json([
+                'id'         => $opt->id,
+                'label'      => $opt->label,
+                'discipline_label' => $opt->discipline_label,
+                'entreprise' => $opt->entreprise,
+            ]);
+        }
+
+        return back()->with('success', __('messages.chantier_discipline_added'));
+    }
+
+    // ── Supprimer un couple discipline/entreprise ─────────────
+    public function removeDiscipline(Chantier $chantier, ChantierDiscipline $discipline)
+    {
+        $this->authorizeChef($chantier);
+
+        if ($discipline->chantier_id !== $chantier->id) {
+            abort(404);
+        }
+
+        $discipline->delete(); // les membres rattachés passent à null (FK nullOnDelete)
+
+        return back()->with('success', __('messages.chantier_discipline_removed'));
     }
 
     // ── Peut voir le chantier (membre ou admin) ───────────────
