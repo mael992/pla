@@ -296,6 +296,14 @@ return [
     'contact_browse'=>'Scegli file',
     'contact_no_file'=>'Nessun file selezionato',
     'contact_files_count'=>'file selezionati',
+
+    // ── SEO (meta descriptions)
+    'meta_default'=>'PlanEx — piattaforma per gestire e monitorare le anomalie di cantiere: ingegneria, sviluppo, messa in servizio, esercizio e supporto.',
+    'seo_home_desc'=>'PlanEx, la piattaforma per monitorare e gestire le anomalie dei tuoi cantieri: ingegneria, sviluppo, messa in servizio, esercizio e supporto.',
+    'seo_infos_desc'=>'Informazioni su PlanEx: scopri la piattaforma di monitoraggio delle anomalie di cantiere.',
+    'seo_news_desc'=>'Novità e aggiornamenti della piattaforma PlanEx.',
+    'seo_pricing_desc'=>'Prezzi PlanEx: pacchetti Bronze, Silver, Gold e Platinum per la gestione delle anomalie di cantiere.',
+    'seo_contact_desc'=>'Contatta il team PlanEx: domande, problemi tecnici, suggerimenti e abbonamenti.',
     'contact_sq_conn_username'=>'Problema con il nome utente?',
     'contact_sq_conn_password'=>'Problema di reimpostazione della password?',
     'contact_sq_ano_add'=>"Problema durante l'aggiunta di un'anomalia",

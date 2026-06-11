@@ -296,6 +296,14 @@ return [
     'contact_browse'=>'Choose files',
     'contact_no_file'=>'No file selected',
     'contact_files_count'=>'file(s) selected',
+
+    // ── SEO (meta descriptions)
+    'meta_default'=>'PlanEx — platform to manage and track worksite anomalies: engineering, development, commissioning, operation and support.',
+    'seo_home_desc'=>'PlanEx, the platform to track and manage your worksite anomalies: engineering, development, commissioning, operation and support.',
+    'seo_infos_desc'=>'About PlanEx: discover the worksite anomaly tracking platform.',
+    'seo_news_desc'=>'News and updates of the PlanEx platform.',
+    'seo_pricing_desc'=>'PlanEx pricing: Bronze, Silver, Gold and Platinum packs for worksite anomaly management.',
+    'seo_contact_desc'=>'Contact the PlanEx team: questions, technical issues, suggestions and subscriptions.',
     'contact_sq_conn_username'=>'Username problem?',
     'contact_sq_conn_password'=>'Password reset problem?',
     'contact_sq_ano_add'=>'Problem when adding an anomaly',

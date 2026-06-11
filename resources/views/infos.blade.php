@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('messages.infos_title') . ' — PlanEx')
+@section('meta_description', __('messages.seo_infos_desc'))
+
 @section('content')
 
 <div class="container py-5" style="max-width: 760px;">

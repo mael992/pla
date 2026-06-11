@@ -296,6 +296,14 @@ return [
     'contact_browse'=>'Elegir archivos',
     'contact_no_file'=>'Ningún archivo seleccionado',
     'contact_files_count'=>'archivo(s) seleccionado(s)',
+
+    // ── SEO (meta descriptions)
+    'meta_default'=>'PlanEx — plataforma para gestionar y supervisar las anomalías de obra: ingeniería, desarrollo, puesta en marcha, explotación y soporte.',
+    'seo_home_desc'=>'PlanEx, la plataforma para supervisar y gestionar las anomalías de sus obras: ingeniería, desarrollo, puesta en marcha, explotación y soporte.',
+    'seo_infos_desc'=>'Acerca de PlanEx: descubra la plataforma de seguimiento de anomalías de obra.',
+    'seo_news_desc'=>'Novedades y actualizaciones de la plataforma PlanEx.',
+    'seo_pricing_desc'=>'Precios de PlanEx: packs Bronze, Silver, Gold y Platinum para la gestión de anomalías de obra.',
+    'seo_contact_desc'=>'Contacte con el equipo de PlanEx: preguntas, problemas técnicos, sugerencias y suscripciones.',
     'contact_sq_conn_username'=>'¿Problema con el nombre de usuario?',
     'contact_sq_conn_password'=>'¿Problema al restablecer la contraseña?',
     'contact_sq_ano_add'=>'Problema al añadir una anomalía',

@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', __('messages.pricing_title') . ' — PlanEx')
+@section('meta_description', __('messages.seo_pricing_desc'))
+
 @section('styles')
 <style>
 .pricing-card {

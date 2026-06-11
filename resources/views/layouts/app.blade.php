@@ -3,7 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanEx</title>
+
+    <title>@yield('title', 'PlanEx')</title>
+    <meta name="description" content="@yield('meta_description', __('messages.meta_default'))">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Open Graph (partage réseaux sociaux) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PlanEx">
+    <meta property="og:title" content="@yield('title', 'PlanEx')">
+    <meta property="og:description" content="@yield('meta_description', __('messages.meta_default'))">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('images/Planex.jpg') }}">
+
+    {{-- Données structurées : site + navigation (aide aux sitelinks Google) --}}
+    @php
+        $ldWebsite = [
+            '@context' => 'https://schema.org',
+            '@type'    => 'WebSite',
+            'name'     => 'PlanEx',
+            'url'      => url('/'),
+        ];
+        $ldNav = [
+            '@context' => 'https://schema.org',
+            '@type'    => 'SiteNavigationElement',
+            'name'     => [__('messages.nav_home'), __('messages.nav_infos'), __('messages.nav_news'), __('messages.nav_contact')],
+            'url'      => [route('home'), route('infos'), route('nouveautes'), route('contact')],
+        ];
+        $ldFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+    @endphp
+    <script type="application/ld+json">{!! json_encode($ldWebsite, $ldFlags) !!}</script>
+    <script type="application/ld+json">{!! json_encode($ldNav, $ldFlags) !!}</script>
 
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">

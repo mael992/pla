@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /chantiers
+Disallow: /incidents
+Disallow: /users
+Disallow: /login
+Disallow: /message/
+
+Sitemap: https://planex26.com/sitemap.xml

@@ -23,6 +23,22 @@ Route::get('/infos',      [PageController::class, 'infos'])->name('infos');
 Route::get('/tarifs',     [PageController::class, 'tarifs'])->name('tarifs');
 Route::get('/nouveautes', [PageController::class, 'nouveautes'])->name('nouveautes');
 
+// ── SEO : sitemap.xml ────────────────────────────────────────
+Route::get('/sitemap.xml', function () {
+    $urls = [
+        route('home'), route('infos'), route('nouveautes'),
+        route('contact'), route('tarifs'),
+    ];
+    $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    foreach ($urls as $u) {
+        $xml .= '  <url><loc>' . e($u) . '</loc></url>' . "\n";
+    }
+    $xml .= '</urlset>';
+
+    return response($xml, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 // ── CONTACT (système de ticketing) ───────────────────────────
 Route::get('/contact',  [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');

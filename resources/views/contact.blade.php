@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Contact — PlanEx')
+@section('title', __('messages.nav_contact') . ' — PlanEx')
+@section('meta_description', __('messages.seo_contact_desc'))
 
 @section('content')
 <div class="container py-5">
