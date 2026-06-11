@@ -309,8 +309,9 @@ function buildRow(inc) {
 
     const tr = document.createElement('tr');
     tr.dataset.id = inc.id;
+    const ref = inc.reference ?? ('#' + inc.id);
     tr.innerHTML = `
-        <td class="fw-semibold text-muted">${inc.id}</td>
+        <td><span class="badge-ref">${ref}</span></td>
         <td>${inc.date_emis ?? '—'}</td>
         <td>${photoOuv}</td>
         <td>${photoFerm}</td>

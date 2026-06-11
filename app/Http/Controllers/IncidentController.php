@@ -346,17 +346,23 @@ class IncidentController extends Controller
             ->get()
             ->map(function ($i) {
                 return [
-                    'id'         => $i->id_incident,
-                    'date_emis'  => $i->date_emis
+                    'id'            => $i->id_incident,
+                    'reference'     => $i->reference ?? ('#' . $i->id_incident),
+                    'date_emis'     => $i->date_emis
                         ? \Carbon\Carbon::parse($i->date_emis)->format('d/m/Y')
                         : '—',
-                    'zone'       => $i->zoneObj->name ?? '—',
-                    'discipline' => $i->discipline ?? '—',
-                    'categorie'  => $i->categorie_label ?? '—',
-                    'statut'     => $i->statut ?? '—',
-                    'url_voir'   => route('incidents.show', $i->id_incident),
-                    'url_edit'   => route('incidents.edit', $i->id_incident),
-                    'url_delete' => route('incidents.destroy', $i->id_incident),
+                    'date_cloture'  => $i->date_cloture
+                        ? \Carbon\Carbon::parse($i->date_cloture)->format('d/m/Y')
+                        : '—',
+                    'photo_ouverte' => $i->photo_ouverte,
+                    'photo_fermee'  => $i->photo_fermee,
+                    'zone'          => $i->zoneObj->name ?? '—',
+                    'discipline'    => $i->discipline ?? '—',
+                    'categorie'     => $i->categorie_label ?? '—',
+                    'statut'        => $i->statut ?? '—',
+                    'url_voir'      => route('incidents.show', $i->id_incident),
+                    'url_edit'      => route('incidents.edit', $i->id_incident),
+                    'url_delete'    => route('incidents.destroy', $i->id_incident),
                 ];
             });
 
