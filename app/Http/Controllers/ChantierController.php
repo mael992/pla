@@ -154,30 +154,43 @@ class ChantierController extends Controller
         $this->authorizeChef($chantier);
 
         $request->validate([
-            'user_id'                => 'required|exists:users,id',
-            'chantier_discipline_id' => [
-                'required',
-                Rule::exists('chantier_disciplines', 'id')->where('chantier_id', $chantier->id),
-            ],
+            'user_id'     => 'required|exists:users,id',
+            'role_choice' => 'required|string',
         ]);
 
-        $user    = User::findOrFail($request->user_id);
-        $couple  = $chantier->disciplines()->findOrFail($request->chantier_discipline_id);
+        $user = User::findOrFail($request->user_id);
 
         // Vérifier qu'il n'est pas déjà membre
         if ($chantier->users()->where('user_id', $user->id)->exists()) {
             return back()->withErrors(['user_id' => __('messages.chantier_user_already')]);
         }
 
-        $chantier->users()->attach($user->id, [
-            'role_chantier'          => $couple->discipline,
-            'chantier_discipline_id' => $couple->id,
-            'is_creator'             => false,
-        ]);
+        // "chef_chantier" : ajout possible sans couple discipline/entreprise.
+        // Plusieurs chefs de chantier autorisés (un seul créateur).
+        if ($request->role_choice === 'chef_chantier') {
+            $chantier->users()->attach($user->id, [
+                'role_chantier'          => 'chef_chantier',
+                'chantier_discipline_id' => null,
+                'is_creator'             => false,
+            ]);
+            $roleLabel = Chantier::ROLES['chef_chantier'];
+        } else {
+            $couple = $chantier->disciplines()
+                ->where('id', $request->role_choice)
+                ->first();
+            if (!$couple) {
+                return back()->withErrors(['role_choice' => __('messages.chantier_discipline_required_member')]);
+            }
+            $chantier->users()->attach($user->id, [
+                'role_chantier'          => $couple->discipline,
+                'chantier_discipline_id' => $couple->id,
+                'is_creator'             => false,
+            ]);
+            $roleLabel = Chantier::DISCIPLINES[$couple->discipline] ?? $couple->discipline;
+        }
 
         // Email de notification si l'user a un email
         if ($user->email) {
-            $roleLabel = Chantier::DISCIPLINES[$couple->discipline] ?? $couple->discipline;
             try {
                 Mail::to($user->email)->send(new ChantierUserAdded($user, $chantier, $roleLabel));
             } catch (\Exception $e) {
@@ -194,19 +207,26 @@ class ChantierController extends Controller
         $this->authorizeChef($chantier);
 
         $request->validate([
-            'chantier_discipline_id' => [
-                'required',
-                Rule::exists('chantier_disciplines', 'id')->where('chantier_id', $chantier->id),
-            ],
+            'role_choice' => 'required|string',
         ]);
 
-        $couple = $chantier->disciplines()->findOrFail($request->chantier_discipline_id);
-
-        // Mise à jour du rôle — autorisé pour tout le monde (créateur ou non)
-        $chantier->users()->updateExistingPivot($user->id, [
-            'role_chantier'          => $couple->discipline,
-            'chantier_discipline_id' => $couple->id,
-        ]);
+        if ($request->role_choice === 'chef_chantier') {
+            $chantier->users()->updateExistingPivot($user->id, [
+                'role_chantier'          => 'chef_chantier',
+                'chantier_discipline_id' => null,
+            ]);
+        } else {
+            $couple = $chantier->disciplines()
+                ->where('id', $request->role_choice)
+                ->first();
+            if (!$couple) {
+                return back()->withErrors(['role_choice' => __('messages.chantier_discipline_required_member')]);
+            }
+            $chantier->users()->updateExistingPivot($user->id, [
+                'role_chantier'          => $couple->discipline,
+                'chantier_discipline_id' => $couple->id,
+            ]);
+        }
 
         return back()->with('success', __('messages.chantier_user_updated'));
     }

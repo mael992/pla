@@ -256,12 +256,21 @@
 <script>
 const POLL_URL   = '{{ route("incidents.poll") }}';
 const POLL_DELAY = 5000;
+@php
+    $pollFilter = '';
+    if (request('chantier_id')) {
+        $pollFilter = '&chantier_id=' . urlencode(request('chantier_id'));
+    } elseif (request('search')) {
+        $pollFilter = '&search=' . urlencode(request('search'));
+    }
+@endphp
+const POLL_FILTER = @json($pollFilter);
 
 let lastKnownId = {{ $incidents->isNotEmpty() ? $incidents->first()->id_incident : 0 }};
 
 async function pollIncidents() {
     try {
-        const res  = await fetch(`${POLL_URL}?last_id=${lastKnownId}`, {
+        const res  = await fetch(`${POLL_URL}?last_id=${lastKnownId}${POLL_FILTER}`, {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }

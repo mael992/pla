@@ -14,13 +14,9 @@ class IncidentController extends Controller
     public function index(Request $request)
     {
         $user  = auth()->user();
-        $query = Incident::with('zoneobj', 'chantier')->latest('id_incident');
-
-        // Les non-admins ne voient que les incidents de leurs chantiers
-        if (!$user->isAdmin()) {
-            $myChantierIds = $user->chantiers()->pluck('chantiers.id');
-            $query->whereIn('chantier_id', $myChantierIds);
-        }
+        $query = Incident::with('zoneobj', 'chantier')
+            ->visibleTo($user)
+            ->latest('id_incident');
 
         if ($request->filled('chantier_id')) {
             $query->where('chantier_id', $request->chantier_id);
@@ -176,10 +172,7 @@ class IncidentController extends Controller
         $user     = auth()->user();
         $incident = Incident::with('zoneobj', 'chantier')->findOrFail($id);
 
-        if (!$user->isAdmin() && $incident->chantier_id) {
-            $myIds = $user->chantiers()->pluck('chantiers.id')->toArray();
-            if (!in_array($incident->chantier_id, $myIds)) abort(403);
-        }
+        $this->authorizeVisible($incident, $user);
 
         return view('incidents.show', compact('incident'));
     }
@@ -189,10 +182,7 @@ class IncidentController extends Controller
         $user     = auth()->user();
         $incident = Incident::with('zoneobj', 'chantier')->findOrFail($id);
 
-        if (!$user->isAdmin() && $incident->chantier_id) {
-            $myIds = $user->chantiers()->pluck('chantiers.id')->toArray();
-            if (!in_array($incident->chantier_id, $myIds)) abort(403);
-        }
+        $this->authorizeVisible($incident, $user);
 
         $zones     = Zone::orderBy('name')->get();
         $chantiers = $user->isAdmin()
@@ -205,6 +195,8 @@ class IncidentController extends Controller
     public function update(Request $request, $id)
 {
     $incident = Incident::findOrFail($id);
+
+    $this->authorizeVisible($incident, auth()->user());
 
     // Si fermé, seul le statut est modifiable
     if ($incident->statut === 'fermer') {
@@ -311,6 +303,8 @@ class IncidentController extends Controller
     {
         $incident = Incident::findOrFail($id);
 
+        $this->authorizeVisible($incident, auth()->user());
+
         if ($incident->photo_ouverte) {
             Storage::disk('public')->delete($incident->photo_ouverte);
         }
@@ -334,14 +328,46 @@ class IncidentController extends Controller
     }
 
     /**
- * POLL — retourne les incidents plus récents qu'un ID donné
- */
+     * Vérifie que l'utilisateur peut voir/modifier l'incident, sinon 403.
+     */
+    private function authorizeVisible(Incident $incident, $user): void
+    {
+        if ($user->isAdmin()) return;
+
+        $visible = Incident::visibleTo($user)
+            ->where('id_incident', $incident->id_incident)
+            ->exists();
+
+        if (!$visible) {
+            abort(403);
+        }
+    }
+
+    /**
+     * POLL — retourne les incidents plus récents qu'un ID donné.
+     * Applique le MÊME filtrage que index() (visibilité + filtre actif),
+     * sinon le temps réel ré-affiche des anomalies hors périmètre.
+     */
     public function poll(Request $request)
     {
+        $user   = auth()->user();
         $lastId = (int) $request->query('last_id', 0);
 
-        $nouveaux = Incident::with('zoneObj')
-            ->where('id_incident', '>', $lastId)
+        $query = Incident::with('zoneObj')
+            ->visibleTo($user)
+            ->where('id_incident', '>', $lastId);
+
+        if ($request->filled('chantier_id')) {
+            $query->where('chantier_id', $request->query('chantier_id'));
+        } elseif ($request->filled('search')) {
+            $search = $request->query('search');
+            $query->whereHas('chantier', fn($q) =>
+                $q->where('nom', 'like', "%{$search}%")
+                  ->orWhere('localite', 'like', "%{$search}%")
+            );
+        }
+
+        $nouveaux = $query
             ->latest('id_incident')
             ->get()
             ->map(function ($i) {

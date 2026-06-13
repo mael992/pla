@@ -217,17 +217,19 @@
                                 <td>
                                     @php
                                         $memberCouple = $coupleLabels[$member->pivot->chantier_discipline_id] ?? null;
-                                        $memberRoleLabel = $member->pivot->is_creator
+                                        $memberRoleLabel = ($member->pivot->is_creator || $member->pivot->role_chantier === 'chef_chantier')
                                             ? \App\Models\Chantier::ROLES['chef_chantier']
                                             : ($memberCouple->label ?? (\App\Models\Chantier::DISCIPLINES[$member->pivot->role_chantier] ?? $member->pivot->role_chantier));
                                     @endphp
-                                    @if($isChef && !$member->pivot->is_creator && $memberCouples->isNotEmpty())
+                                    @if($isChef && !$member->pivot->is_creator)
+                                    @php $memberRoleChoice = $member->pivot->role_chantier === 'chef_chantier' ? 'chef_chantier' : $member->pivot->chantier_discipline_id; @endphp
                                     <form action="{{ route('chantiers.users.update', [$chantier, $member]) }}" method="POST">
                                         @csrf @method('PUT')
                                         <div class="d-flex gap-1 align-items-center">
-                                            <select name="chantier_discipline_id" class="form-select form-select-sm" style="font-size:12px">
+                                            <select name="role_choice" class="form-select form-select-sm" style="font-size:12px">
+                                                <option value="chef_chantier" {{ $memberRoleChoice === 'chef_chantier' ? 'selected' : '' }}>{{ \App\Models\Chantier::ROLES['chef_chantier'] }}</option>
                                                 @foreach($memberCouples as $opt)
-                                                    <option value="{{ $opt->id }}" {{ $member->pivot->chantier_discipline_id == $opt->id ? 'selected' : '' }}>
+                                                    <option value="{{ $opt->id }}" {{ $memberRoleChoice == $opt->id ? 'selected' : '' }}>
                                                         {{ $opt->label }}{{ $opt->entreprise ? ' — '.$opt->entreprise : '' }}
                                                     </option>
                                                 @endforeach
@@ -263,9 +265,6 @@
                 @if($isChef && $allUsers->isNotEmpty())
                 <div class="card-body border-top pt-3 pb-3">
                     <p class="fw-semibold mb-2" style="font-size:13px">➕ {{ __('messages.chantier_add_member') }}</p>
-                    @if($memberCouples->isEmpty())
-                        <p class="text-warning mb-0" style="font-size:12px">⚠️ {{ __('messages.chantier_discipline_required_member') }}</p>
-                    @else
                     <form action="{{ route('chantiers.users.add', $chantier) }}" method="POST">
                         @csrf
                         <div class="row g-2 align-items-end">
@@ -280,7 +279,8 @@
                             </div>
                             <div class="col-12 col-sm-5">
                                 <label class="form-label" style="font-size:12px">{{ __('messages.chantier_role') }}</label>
-                                <select name="chantier_discipline_id" class="form-select form-select-sm" required>
+                                <select name="role_choice" class="form-select form-select-sm" required>
+                                    <option value="chef_chantier">{{ \App\Models\Chantier::ROLES['chef_chantier'] }}</option>
                                     @foreach($memberCouples as $opt)
                                         <option value="{{ $opt->id }}">{{ $opt->label }}{{ $opt->entreprise ? ' — '.$opt->entreprise : '' }}</option>
                                     @endforeach
@@ -291,7 +291,6 @@
                             </div>
                         </div>
                     </form>
-                    @endif
                 </div>
                 @endif
             </div>
