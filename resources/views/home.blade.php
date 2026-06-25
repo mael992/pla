@@ -68,7 +68,11 @@
 
 @section('content')
 @php
-    $hasHero = file_exists(public_path('images/accueil.jpg'));
+    $heroPath = public_path('images/accueil.jpg');
+    $hasHero  = file_exists($heroPath);
+    // Cache-busting : l'URL change a chaque remplacement de l'image
+    // (evite que Cloudflare/navigateur serve une ancienne version).
+    $heroUrl  = $hasHero ? asset('images/accueil.jpg') . '?v=' . filemtime($heroPath) : '';
 @endphp
 
 <section class="px-hero">
@@ -77,7 +81,7 @@
 
     <div class="px-hero-media">
         @if($hasHero)
-            <img src="{{ asset('images/accueil.jpg') }}" alt="{{ __('messages.home_hero_alt') }}" class="px-hero-img">
+            <img src="{{ $heroUrl }}" alt="{{ __('messages.home_hero_alt') }}" class="px-hero-img">
         @else
             <div class="px-hero-fallback">
                 <div class="px-fb-logo">Plan<span>Ex</span></div>
