@@ -71,7 +71,7 @@
                                 <a href="{{ route('users.courrier', $user->id) }}"
                                    class="btn btn-outline-secondary"
                                    title="{{ __('messages.btn_courrier') }}"
-                                   onclick="courrierClick(event, this)">
+                                   onclick="courrierClick(this)">
                                     📄 PDF
                                 </a>
                                 @endif
@@ -121,19 +121,14 @@ document.getElementById('userSearch').addEventListener('input', function () {
     document.getElementById('noResults').classList.toggle('d-none', visible > 0);
 });
 
-/* ── Courrier : télécharge le PDF + envoie le mail, puis recharge pour masquer le bouton ── */
-function courrierClick(e, el) {
-    e.preventDefault();
-    if (el.dataset.sent) return;          // évite le double-clic
-    el.dataset.sent = '1';
+/* ── Courrier : laisse le lien télécharger le PDF (+ mail côté serveur), désactive
+   le bouton immédiatement (anti double-clic), puis recharge pour le masquer ── */
+function courrierClick(el) {
     el.classList.add('disabled');
-    el.style.pointerEvents = 'none';
+    el.style.pointerEvents = 'none';   // bloque tout 2e clic dès maintenant
     el.style.opacity = '0.5';
-    const ifr = document.createElement('iframe');  // déclenche le téléchargement sans quitter la page
-    ifr.style.display = 'none';
-    ifr.src = el.getAttribute('href');
-    document.body.appendChild(ifr);
-    setTimeout(() => location.reload(), 2500);      // recharge -> le bouton disparaît
+    setTimeout(() => location.reload(), 3000);  // recharge -> bouton disparu
+    // pas de preventDefault : le téléchargement direct du PDF se fait normalement
 }
 
 /* ── Confirmation suppression ── */
