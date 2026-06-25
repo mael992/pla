@@ -101,17 +101,16 @@ class UserController extends Controller
         $filename = 'Courrier_PlanEx_' . $user->username . '.pdf';
         $pdfBinary = $pdf->output();
 
-        // Envoi par e-mail si l'utilisateur a une adresse mail
-        if ($user->email) {
-            try {
-                Mail::to($user->email)->send(new CourrierIdentifiants($user, $pdfBinary));
-            } catch (\Exception $e) {
-                // Ne pas bloquer le téléchargement si l'e-mail échoue
-            }
-        }
-
-        // Le courrier a été émis : on le marque pour masquer le bouton (action unique)
+        // Mail + marquage : une seule fois (évite les doublons si l'endpoint est
+        // rappelé). Le PDF, lui, se télécharge à chaque appel.
         if (is_null($user->courrier_sent_at)) {
+            if ($user->email) {
+                try {
+                    Mail::to($user->email)->send(new CourrierIdentifiants($user, $pdfBinary));
+                } catch (\Exception $e) {
+                    // Ne pas bloquer le téléchargement si l'e-mail échoue
+                }
+            }
             $user->forceFill(['courrier_sent_at' => now()])->save();
         }
 
