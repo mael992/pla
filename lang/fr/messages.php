@@ -251,6 +251,7 @@ return [
     'col_creator' => 'Créateur',
     // ── Suppression utilisateur
     'user_deleted'=>'Utilisateur supprimé et retiré de tous les chantiers.',
+    'user_created'=>'Utilisateur créé avec succès.',
     'user_cannot_delete_self'=>'Vous ne pouvez pas supprimer votre propre compte.',
     'user_search_placeholder'=>'Rechercher par identifiant, e-mail ou rôle...',
     'user_none'=>'Aucun utilisateur trouvé.',

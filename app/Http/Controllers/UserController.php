@@ -52,7 +52,12 @@ class UserController extends Controller
 
         ActivityLogger::user('CREATE', "Utilisateur créé : \"{$user->username}\" (role: {$user->role}, email: " . ($user->email ?? '—') . ")");
 
-        // Télécharger automatiquement le PDF courrier après création
+        // Un admin n'a pas de courrier d'identifiants (courrier() renvoie 403) :
+        // retour direct à la liste. Pour les autres, téléchargement auto du courrier.
+        if ($user->role === 'admin') {
+            return redirect()->route('users.index')->with('success', __('messages.user_created'));
+        }
+
         return redirect()->route('users.courrier', $user->id);
     }
 

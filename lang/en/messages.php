@@ -249,6 +249,7 @@ return [
     'col_creator' => 'Creator',
     // ── Suppression utilisateur
     'user_deleted'=>'User deleted and removed from all worksites.',
+    'user_created'=>'User created successfully.',
     'user_cannot_delete_self'=>'You cannot delete your own account.',
     'user_search_placeholder'=>'Search by username, email or role...',
     'user_none'=>'No user found.',
