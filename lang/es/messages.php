@@ -184,6 +184,12 @@ return [
     // PÁGINAS PÚBLICAS & VARIOS
     // ════════════════════════════════════════════════════════
     'home_title'       => 'Bienvenido a PlanEx — siempre un paso adelante',
+    'home_banner_slogan' => 'Siga sus obras a distancia, esté donde esté.',
+    'home_feature_1'   => 'Datos en tiempo real',
+    'home_feature_2'   => 'Decisiones más rápidas',
+    'home_cta_discover'=> 'Descubrir los planes',
+    'home_cta_access'  => 'Ir al tablero',
+    'home_hero_alt'    => 'Un profesional de la construcción consulta el tablero de anomalías de PlanEx en una tableta, en la obra.',
     'infos_title'      => 'Información',
     'infos_p1'         => '¡PlanEx está oficialmente en línea desde el 22 de junio de 2025! 🚀',
     'infos_p2'         => 'Nos complace anunciarles el lanzamiento oficial de nuestra plataforma, que tuvo lugar el 22 de junio de 2025.',

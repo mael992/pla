@@ -184,6 +184,12 @@ return [
     // PAGES PUBLIQUES & DIVERS
     // ════════════════════════════════════════════════════════
     'home_title'       => "Bienvenue sur PlanEx — toujours une idée d'avance",
+    'home_banner_slogan' => "Suivez vos chantiers à distance, où que vous soyez.",
+    'home_feature_1'   => 'Données en temps réel',
+    'home_feature_2'   => 'Décisions plus rapides',
+    'home_cta_discover'=> 'Découvrir les offres',
+    'home_cta_access'  => 'Accéder au tableau',
+    'home_hero_alt'    => "Un professionnel du BTP consulte le tableau des anomalies PlanEx sur tablette, sur un chantier.",
     'infos_title'      => 'Informations',
     'infos_p1'         => 'PlanEx est officiellement ouvert depuis le 22 juin 2025 ! 🚀',
     'infos_p2'         => "Nous sommes heureux de vous annoncer le lancement officiel de notre plateforme, intervenu le 22 juin 2025.",

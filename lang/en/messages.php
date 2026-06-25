@@ -184,6 +184,12 @@ return [
     // PUBLIC PAGES & MISC
     // ════════════════════════════════════════════════════════
     'home_title'       => 'Welcome to PlanEx — always one step ahead',
+    'home_banner_slogan' => 'Track your sites remotely, wherever you are.',
+    'home_feature_1'   => 'Real-time data',
+    'home_feature_2'   => 'Faster decisions',
+    'home_cta_discover'=> 'Discover the plans',
+    'home_cta_access'  => 'Go to the board',
+    'home_hero_alt'    => 'A construction professional checking the PlanEx anomalies board on a tablet, on site.',
     'infos_title'      => 'Information',
     'infos_p1'         => 'PlanEx has been officially live since 22 June 2025! 🚀',
     'infos_p2'         => 'We are delighted to announce the official launch of our platform, which took place on 22 June 2025.',
