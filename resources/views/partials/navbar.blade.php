@@ -8,6 +8,11 @@
     $isLoggedIn = auth()->check();
     $isUser     = $isLoggedIn && auth()->user()->role === 'user';
 
+    // Badge "nouveauté" : change cet identifiant a chaque nouvelle annonce
+    // pour reafficher la pastille a tous les visiteurs.
+    $newsVersion = '2026-06-tableau-anomalies';
+    $onNewsPage  = request()->routeIs('nouveautes');
+
     // Lien tableau : dashboard si accès, tarifs sinon
     $tableauHref = $hasAccess ? route('dashboard') : route('tarifs');
 
@@ -23,6 +28,27 @@
     ];
 @endphp
 
+<style>
+.nav-news-link { position: relative; }
+.nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 6px;
+    border-radius: 9px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+    box-shadow: 0 0 0 2px rgba(239,68,68,.25);
+}
+</style>
+
 <nav class="navbar">
     <div class="navbar-container">
 
@@ -35,7 +61,7 @@
         <ul class="nav-links-desktop">
             <li><a href="{{ route('home') }}">{{ __('messages.nav_home') }}</a></li>
             <li><a href="{{ route('infos') }}">{{ __('messages.nav_infos') }}</a></li>
-            <li><a href="{{ route('nouveautes') }}">{{ __('messages.nav_news') }}</a></li>
+            <li><a href="{{ route('nouveautes') }}" class="nav-news-link">{{ __('messages.nav_news') }}<span class="nav-badge" data-news-badge style="display:none">1</span></a></li>
             <li><a href="{{ route('contact') }}">{{ __('messages.nav_contact') }}</a></li>
 
             {{-- Dropdown tableau — visible uniquement si connecté --}}
@@ -161,7 +187,7 @@
     <nav class="nav-mobile-links">
         <a href="{{ route('home') }}"    onclick="closeNavMenu()"><span class="nav-mobile-icon">🏠</span>{{ __('messages.nav_home') }}</a>
         <a href="{{ route('infos') }}"   onclick="closeNavMenu()"><span class="nav-mobile-icon">ℹ️</span>{{ __('messages.nav_infos') }}</a>
-        <a href="{{ route('nouveautes') }}" onclick="closeNavMenu()"><span class="nav-mobile-icon">🆕</span>{{ __('messages.nav_news') }}</a>
+        <a href="{{ route('nouveautes') }}" onclick="closeNavMenu()"><span class="nav-mobile-icon">🆕</span>{{ __('messages.nav_news') }}<span class="nav-badge" data-news-badge style="display:none">1</span></a>
         <a href="{{ route('contact') }}" onclick="closeNavMenu()"><span class="nav-mobile-icon">✉️</span>{{ __('messages.nav_contact') }}</a>
 
         {{-- Tableau anomalie — uniquement si connecté --}}
@@ -263,4 +289,24 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeAllDropdowns(); closeNavMenu(); }
 });
+
+// ── Pastille "nouveauté" sur le menu Nouveautés ──────────────
+(function () {
+    const NEWS_VERSION = @json($newsVersion);
+    const ON_NEWS_PAGE = @json($onNewsPage);
+    const KEY = 'planex_news_seen';
+    const badges = document.querySelectorAll('[data-news-badge]');
+
+    if (ON_NEWS_PAGE) {
+        // L'utilisateur consulte la page : on marque comme vu, pas de pastille
+        try { localStorage.setItem(KEY, NEWS_VERSION); } catch (e) {}
+        return;
+    }
+
+    let seen = null;
+    try { seen = localStorage.getItem(KEY); } catch (e) {}
+    if (seen !== NEWS_VERSION) {
+        badges.forEach(b => { b.style.display = 'inline-flex'; });
+    }
+})();
 </script>
