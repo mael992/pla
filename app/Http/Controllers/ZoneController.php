@@ -31,15 +31,22 @@ class ZoneController extends Controller
 
     public function destroy(Zone $zone)
     {
-        // Vérifier si des incidents utilisent cette zone
-        if ($zone->incidents()->count() > 0) {
-            return redirect()->route('zones.index')
-                ->with('error', 'Impossible : des incidents sont rattachés à cette zone.');
+        // Suppression réservée aux administrateurs
+        if (!auth()->user() || !auth()->user()->isAdmin()) {
+            abort(403);
         }
+
+        // Les incidents liés sont conservés : on détache la zone et on les marque
+        // "réselection de zone nécessaire" (au lieu de bloquer la suppression).
+        $count = $zone->incidents()->count();
+        $zone->incidents()->update(['zone_id' => null, 'zone_reselect' => true]);
 
         $zone->delete();
 
-        return redirect()->route('zones.index')
-            ->with('success', 'Zone supprimée.');
+        $msg = $count > 0
+            ? __('messages.zone_deleted_reselect', ['count' => $count])
+            : __('messages.zone_deleted');
+
+        return redirect()->route('zones.index')->with('success', $msg);
     }
 }

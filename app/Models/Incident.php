@@ -19,9 +19,13 @@ class Incident extends Model
         'reference',
         'date_emis', 'photo_ouverte', 'photo_fermee', 'date_maj',
         'date_cloture', 'discipline', 'systeme', 'lot_travail',
-        'zone_id', 'chantier_id', 'etiquette', 'description', 'categorie',
+        'zone_id', 'zone_reselect', 'chantier_id', 'etiquette', 'description', 'categorie',
         'interne', 'statut', 'responsabilite', 'emis_par',
         'qfc_ouvert', 'qfc_ferme', 'cloture_prevue',
+    ];
+
+    protected $casts = [
+        'zone_reselect' => 'boolean',
     ];
 
     public function zoneObj()

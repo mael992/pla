@@ -48,10 +48,16 @@ Route::get('/message/{token}',         [PublicThreadController::class, 'show'])-
 Route::post('/message/{token}/reply',  [PublicThreadController::class, 'reply'])->name('message.reply');
 Route::post('/message/{token}/reopen', [PublicThreadController::class, 'requestReopen'])->name('message.reopen');
 
-// ── ZONES (public — accessibles depuis le formulaire) ────────
-Route::get('/zones',           [ZoneController::class, 'index'])->name('zones.index');
-Route::post('/zones',          [ZoneController::class, 'store'])->name('zones.store');
-Route::delete('/zones/{zone}', [ZoneController::class, 'destroy'])->name('zones.destroy');
+// ── ZONES ────────────────────────────────────────────────────
+// Consultation + ajout : utilisateurs ayant accès aux anomalies (formulaire)
+Route::middleware(['auth', 'incidents.access'])->group(function () {
+    Route::get('/zones',  [ZoneController::class, 'index'])->name('zones.index');
+    Route::post('/zones', [ZoneController::class, 'store'])->name('zones.store');
+});
+// Suppression : administrateurs uniquement
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::delete('/zones/{zone}', [ZoneController::class, 'destroy'])->name('zones.destroy');
+});
 
 // ── ADMIN UNIQUEMENT ─────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->group(function () {

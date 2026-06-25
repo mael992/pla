@@ -44,7 +44,13 @@
                 </div>
                 <div class="info-row">
                     <dt>{{ __('messages.field_zone') }}</dt>
-                    <dd>{{ $incident->zoneobj->name ?? '—' }}</dd>
+                    <dd>
+                        @if($incident->zone_reselect)
+                            <span class="badge bg-warning text-dark">⚠ {{ __('messages.zone_reselect_needed') }}</span>
+                        @else
+                            {{ $incident->zoneobj->name ?? '—' }}
+                        @endif
+                    </dd>
                 </div>
                 <div class="info-row">
                     <dt>{{ __('messages.field_chantier') }}</dt>

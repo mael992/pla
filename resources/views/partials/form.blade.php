@@ -112,7 +112,17 @@
 
     {{-- ZONE --}}
     <div class="col-md-6">
-        <label class="form-label">{{ __('messages.field_zone') }}</label>
+        <label class="form-label">
+            {{ __('messages.field_zone') }}
+            @if(isset($incident) && $incident->zone_reselect)
+                <span class="badge bg-warning text-dark">⚠ {{ __('messages.zone_reselect_needed') }}</span>
+            @endif
+        </label>
+        @if(isset($incident) && $incident->zone_reselect)
+            <div class="alert alert-warning py-1 px-2 mb-1" style="font-size:12px">
+                {{ __('messages.zone_reselect_banner') }}
+            </div>
+        @endif
         <div class="input-group">
             <select name="zone_id" id="selectZone" class="form-select" {{ $dis }}>
                 <option value="">{{ __('messages.select_placeholder') }}</option>

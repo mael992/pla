@@ -46,6 +46,7 @@
             @forelse($zones as $zone)
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ $zone->name }}</span>
+                @if(auth()->user() && auth()->user()->isAdmin())
                 <form action="{{ route('zones.destroy', $zone->id) }}"
                       method="POST"
                       onsubmit="return confirm('{{ __('messages.zone_confirm_delete', ['name' => $zone->name]) }}')">
@@ -55,6 +56,7 @@
                         {{ __('messages.btn_delete') }}
                     </button>
                 </form>
+                @endif
             </li>
             @empty
             <li class="list-group-item text-muted text-center py-4">

@@ -245,6 +245,11 @@ class IncidentController extends Controller
     $data = $request->except(['_token', '_method', 'date_cloture',
                                'remove_photo_ouverte', 'remove_photo_fermee']);
 
+    // Une zone (re)sélectionnée lève le drapeau "réselection nécessaire"
+    if ($request->filled('zone_id')) {
+        $data['zone_reselect'] = false;
+    }
+
     // ===== SUPPRESSION PHOTO OUVERTE =====
     if ($request->input('remove_photo_ouverte') == '1') {
         if (!empty($incident->photo_ouverte)
