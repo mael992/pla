@@ -199,6 +199,7 @@ return [
     'news_p4'          => 'Esperamos que esta evolución responda a sus necesidades y le acompañe a diario en la gestión de sus proyectos.',
     'news_signoff'     => 'Atentamente,',
     'news_team'        => 'El equipo Planex26',
+    'pdf_nothing_to_export' => 'No hay anomalías para exportar de sus obras.',
     // claves legadas mantenidas por compatibilidad
     'news_coming_p1'   => 'Esta página estará disponible pronto.',
     'news_coming_p2'   => 'El equipo de PlanEx les agradece su paciencia y comprensión.',

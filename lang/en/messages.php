@@ -199,6 +199,7 @@ return [
     'news_p4'          => 'We hope this update will meet your needs and support you day to day in managing your projects.',
     'news_signoff'     => 'Best regards,',
     'news_team'        => 'The Planex26 team',
+    'pdf_nothing_to_export' => 'No anomalies to export for your sites.',
     // legacy keys kept for compatibility
     'news_coming_p1'   => 'This page will be available soon.',
     'news_coming_p2'   => 'The PlanEx team thanks you for your patience and understanding.',

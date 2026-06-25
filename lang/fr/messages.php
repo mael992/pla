@@ -199,6 +199,7 @@ return [
     'news_p4'          => "Nous espérons que cette évolution répondra à vos besoins et vous accompagnera au quotidien dans le pilotage de vos projets.",
     'news_signoff'     => 'Cordialement,',
     'news_team'        => "L'équipe Planex26",
+    'pdf_nothing_to_export' => "Aucune anomalie à exporter pour vos chantiers.",
     // anciennes clés conservées pour compat
     'news_coming_p1'   => 'Cette page sera bientôt disponible.',
     'news_coming_p2'   => "L'équipe PlanEx vous remercie de votre patience et de votre compréhension.",

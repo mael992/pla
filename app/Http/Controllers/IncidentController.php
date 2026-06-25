@@ -40,7 +40,14 @@ class IncidentController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $query = Incident::with('zoneobj', 'chantier')->orderBy('id_incident');
+        $user  = auth()->user();
+
+        // L'export respecte les memes droits que le tableau :
+        // seules les anomalies des chantiers (et disciplines) accessibles
+        // a l'utilisateur sont exportees. Aucun chantier => rien.
+        $query = Incident::with('zoneobj', 'chantier')
+            ->visibleTo($user)
+            ->orderBy('id_incident');
 
         $chantier = null;
         if ($request->filled('chantier_id')) {
@@ -54,6 +61,13 @@ class IncidentController extends Controller
         }
 
         $incidents = $query->get();
+
+        // Rien a exporter (aucun acces chantier / filtre hors perimetre)
+        if ($incidents->isEmpty()) {
+            return redirect()
+                ->route('incidents.index', $request->only(['chantier_id', 'search']))
+                ->with('error', __('messages.pdf_nothing_to_export'));
+        }
 
         // ── Stats par discipline ──────────────────────────────
         $statsByDiscipline = $incidents

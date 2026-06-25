@@ -199,6 +199,7 @@ return [
     'news_p4'          => 'Ci auguriamo che questa evoluzione risponda alle vostre esigenze e vi accompagni quotidianamente nella gestione dei vostri progetti.',
     'news_signoff'     => 'Cordiali saluti,',
     'news_team'        => 'Il team Planex26',
+    'pdf_nothing_to_export' => 'Nessuna anomalia da esportare per i vostri cantieri.',
     // chiavi legacy mantenute per compatibilità
     'news_coming_p1'   => 'Questa pagina sarà presto disponibile.',
     'news_coming_p2'   => 'Il team PlanEx vi ringrazia per la vostra pazienza e comprensione.',
