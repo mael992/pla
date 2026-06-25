@@ -32,6 +32,7 @@ class User extends Authenticatable
             'password'                 => 'hashed',
             'temp_password_expires_at' => 'datetime',
             'must_change_password'     => 'boolean',
+            'courrier_sent_at'         => 'datetime',
         ];
     }
 

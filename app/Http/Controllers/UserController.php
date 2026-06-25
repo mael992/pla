@@ -58,7 +58,10 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('success', __('messages.user_created'));
         }
 
-        return redirect()->route('users.courrier', $user->id);
+        // Non-admin : retour à la liste + téléchargement auto du courrier (iframe).
+        return redirect()->route('users.index')
+            ->with('success', __('messages.user_created'))
+            ->with('courrier_download', $user->id);
     }
 
     public function edit($id)
@@ -112,6 +115,11 @@ class UserController extends Controller
             } catch (\Exception $e) {
                 // Ne pas bloquer le téléchargement si l'e-mail échoue
             }
+        }
+
+        // Le courrier a été émis : on le marque pour masquer le bouton (action unique)
+        if (is_null($user->courrier_sent_at)) {
+            $user->forceFill(['courrier_sent_at' => now()])->save();
         }
 
         return response($pdfBinary, 200)

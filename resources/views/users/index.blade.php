@@ -20,6 +20,12 @@
         <div class="alert alert-danger mb-3">{{ $errors->first() }}</div>
     @endif
 
+    @if(session('courrier_download'))
+        {{-- Téléchargement auto du courrier du nouvel utilisateur (action unique) --}}
+        <iframe src="{{ route('users.courrier', session('courrier_download')) }}"
+                style="display:none" title="courrier" aria-hidden="true"></iframe>
+    @endif
+
     {{-- Barre de recherche --}}
     <div class="mb-3" style="max-width:400px">
         <div class="search-input-group">
@@ -67,7 +73,7 @@
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-primary">
                                     ✏️ {{ __('messages.btn_edit') }}
                                 </a>
-                                @if($user->must_change_password && $user->role !== 'admin')
+                                @if($user->must_change_password && $user->role !== 'admin' && is_null($user->courrier_sent_at) && session('courrier_download') != $user->id)
                                 <a href="{{ route('users.courrier', $user->id) }}"
                                    class="btn btn-outline-secondary"
                                    title="{{ __('messages.btn_courrier') }}">
