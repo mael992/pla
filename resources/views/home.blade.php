@@ -63,45 +63,12 @@
 }
 .px-fb-feats span { display: inline-flex; align-items: center; gap: 8px; opacity: .9; }
 .px-fb-feats b { color: #ef4444; font-size: 1.1rem; line-height: 1; }
-
-.px-hero-cta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 32px;
-}
-.px-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 26px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-}
-.px-btn-primary {
-    background: #ef4444;
-    color: #fff;
-    box-shadow: 0 8px 20px rgba(239,68,68,.32);
-}
-.px-btn-primary:hover { background: #dc2626; transform: translateY(-1px); color: #fff; }
-.px-btn-ghost {
-    background: transparent;
-    color: inherit;
-    border: 1.5px solid currentColor;
-}
-.px-btn-ghost:hover { transform: translateY(-1px); color: inherit; }
 </style>
 @endsection
 
 @section('content')
 @php
-    $hasHero   = file_exists(public_path('images/accueil.jpg'));
-    $u         = auth()->user();
-    $hasAccess = $u && ($u->isAdmin() || $u->isIncident());
+    $hasHero = file_exists(public_path('images/accueil.jpg'));
 @endphp
 
 <section class="px-hero">
@@ -121,21 +88,6 @@
                 </div>
             </div>
         @endif
-    </div>
-
-    <div class="px-hero-cta">
-        @auth
-            @if($hasAccess)
-                <a href="{{ route('dashboard') }}" class="px-btn px-btn-primary">{{ __('messages.home_cta_access') }}</a>
-                <a href="{{ route('chantiers.index') }}" class="px-btn px-btn-ghost">{{ __('messages.nav_chantiers') }}</a>
-            @else
-                <a href="{{ route('tarifs') }}" class="px-btn px-btn-primary">{{ __('messages.home_cta_discover') }}</a>
-            @endif
-        @endauth
-        @guest
-            <a href="{{ route('tarifs') }}" class="px-btn px-btn-primary">{{ __('messages.home_cta_discover') }}</a>
-            <a href="{{ route('login') }}" class="px-btn px-btn-ghost">{{ __('messages.nav_login') }}</a>
-        @endguest
     </div>
 
 </section>
