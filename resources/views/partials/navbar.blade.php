@@ -47,6 +47,62 @@
     vertical-align: middle;
     box-shadow: 0 0 0 2px rgba(239,68,68,.25);
 }
+
+/* ── Bouton "Mon compte" (nom d'utilisateur) ─────────────── */
+.nav-account {
+    position: relative;
+    color: #ddd !important;
+    text-decoration: none;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.nav-account:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.18);
+    color: #fff !important;
+}
+.nav-account .nav-account-gear {
+    font-size: 11px;
+    opacity: .6;
+    transition: opacity .15s ease, transform .3s ease;
+}
+.nav-account:hover .nav-account-gear { opacity: 1; transform: rotate(90deg); }
+/* Bulle d'info au survol */
+.nav-account-tip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(2px);
+    background: #111;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 6px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2000;
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    transition: opacity .15s ease, transform .15s ease;
+}
+.nav-account-tip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #111;
+}
+.nav-account:hover .nav-account-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(8px);
+}
 </style>
 
 <nav class="navbar">
@@ -95,9 +151,11 @@
 
             @auth
                 <div class="nav-desktop-auth">
-                    <a href="{{ route('profile.edit') }}" class="user" style="text-decoration:none;color:#ddd" title="{{ __('messages.account_link') }}">
+                    <a href="{{ route('profile.edit') }}" class="user nav-account">
                         <span class="user-dot"></span>
                         {{ auth()->user()->username }}
+                        <span class="nav-account-gear">⚙</span>
+                        <span class="nav-account-tip">{{ __('messages.account_manage_hint') }}</span>
                     </a>
                     <div class="nav-sep"></div>
                     @if($hasAccess)

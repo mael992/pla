@@ -214,6 +214,7 @@ return [
 
     // ── Il mio account ──────────────────────────────────────
     'account_link'                  => 'Il mio account',
+    'account_manage_hint'           => 'Gestisci il mio account',
     'account_title'                 => 'Il mio account',
     'account_identity'              => 'Credenziali',
     'account_username'              => 'Nome utente di accesso',
