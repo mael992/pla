@@ -221,7 +221,7 @@ return [
     'account_role'                  => 'Rol',
     'account_email_title'           => 'Correo electrónico',
     'account_email_label'           => 'Correo electrónico',
-    'account_email_help'            => 'Se utiliza para recibir cartas y notificaciones. Déjelo vacío si no tiene.',
+    'account_email_help'            => 'Se utiliza para recibir las cartas y notificaciones de su cuenta. Campo obligatorio.',
     'account_current_password'      => 'Contraseña actual',
     'account_current_password_help' => 'Requerida para confirmar el cambio.',
     'account_save'                  => 'Guardar',

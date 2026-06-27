@@ -95,7 +95,7 @@
 
             @auth
                 <div class="nav-desktop-auth">
-                    <a href="{{ route('profile.edit') }}" class="user" style="text-decoration:none;color:inherit" title="{{ __('messages.account_link') }}">
+                    <a href="{{ route('profile.edit') }}" class="user" style="text-decoration:none;color:#ddd" title="{{ __('messages.account_link') }}">
                         <span class="user-dot"></span>
                         {{ auth()->user()->username }}
                     </a>

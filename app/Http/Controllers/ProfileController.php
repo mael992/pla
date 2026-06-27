@@ -30,14 +30,14 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'email' => [
-                'nullable', 'email', 'max:255',
+                'required', 'email', 'max:255',
                 Rule::unique('users', 'email')->ignore($request->user()->id),
             ],
             'current_password' => ['required', 'current_password'],
         ]);
 
         $user      = $request->user();
-        $newEmail  = $validated['email'] ?: null;
+        $newEmail  = $validated['email'];
         $oldEmail  = $user->email;
 
         $user->forceFill(['email' => $newEmail])->save();

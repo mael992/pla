@@ -35,8 +35,8 @@
                 @method('PATCH')
 
                 <div class="mb-3">
-                    <label for="email" class="form-label">{{ __('messages.account_email_label') }}</label>
-                    <input type="email" id="email" name="email"
+                    <label for="email" class="form-label">{{ __('messages.account_email_label') }} <span class="text-danger">*</span></label>
+                    <input type="email" id="email" name="email" required
                            value="{{ old('email', auth()->user()->email) }}"
                            class="form-control @error('email') is-invalid @enderror"
                            autocomplete="email">

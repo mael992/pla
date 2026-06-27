@@ -221,7 +221,7 @@ return [
     'account_role'                  => 'Role',
     'account_email_title'           => 'Email address',
     'account_email_label'           => 'Email address',
-    'account_email_help'            => "Used to receive letters and notifications. Leave empty if you don't have one.",
+    'account_email_help'            => 'Used to receive your account letters and notifications. This field is required.',
     'account_current_password'      => 'Current password',
     'account_current_password_help' => 'Required to confirm the change.',
     'account_save'                  => 'Save',

@@ -221,7 +221,7 @@ return [
     'account_role'                  => 'Ruolo',
     'account_email_title'           => 'Indirizzo e-mail',
     'account_email_label'           => 'Indirizzo e-mail',
-    'account_email_help'            => 'Utilizzato per ricevere lettere e notifiche. Lasciare vuoto se non ne avete uno.',
+    'account_email_help'            => 'Utilizzato per ricevere le lettere e le notifiche del vostro account. Campo obbligatorio.',
     'account_current_password'      => 'Password attuale',
     'account_current_password_help' => 'Richiesta per confermare la modifica.',
     'account_save'                  => 'Salva',

@@ -221,7 +221,7 @@ return [
     'account_role'                  => 'Rôle',
     'account_email_title'           => 'Adresse e-mail',
     'account_email_label'           => 'Adresse e-mail',
-    'account_email_help'            => "Utilisée pour recevoir les courriers et notifications. Laissez vide si vous n'en avez pas.",
+    'account_email_help'            => 'Utilisée pour recevoir les courriers et notifications de votre compte. Ce champ est obligatoire.',
     'account_current_password'      => 'Mot de passe actuel',
     'account_current_password_help' => 'Requis pour confirmer la modification.',
     'account_save'                  => 'Enregistrer',
