@@ -18,14 +18,31 @@ class ContactController extends Controller
 
     public function submit(Request $request)
     {
+        // Demande de clôture de compte (encart affiché pour la catégorie "abonnement")
+        $closing = $request->boolean('close_account');
+
         $request->validate([
-            'question_1'  => 'required|string',
-            'question_2'  => 'required|string',
-            'message'     => 'required|string|min:1|max:2500',
-            'email'       => 'required|email',
-            'pdfs.*'      => 'nullable|mimes:pdf|max:10240',
-            'images.*'    => 'nullable|image|max:10240',
+            'question_1'     => 'required|string',
+            'question_2'     => ($closing ? 'nullable' : 'required') . '|string',
+            'message'        => ($closing ? 'nullable' : 'required') . '|string|max:2500',
+            'email'          => 'required|email',
+            'pdfs.*'         => 'nullable|mimes:pdf|max:10240',
+            'images.*'       => 'nullable|image|max:10240',
+            'close_username' => $closing ? 'required|string|max:255' : 'nullable|string|max:255',
+            'close_email'    => $closing ? 'required|email|max:255'  : 'nullable|email|max:255',
         ]);
+
+        // Sujet et corps : si clôture, on préfixe la demande avec les infos du compte
+        $question2 = $request->question_2 ?: ($closing ? __('messages.contact_close_subject') : '');
+        $body      = $request->message ?? '';
+        if ($closing) {
+            $body = trim(
+                '[' . __('messages.contact_close_subject') . "]\n"
+                . __('messages.contact_close_username') . ' : ' . $request->close_username . "\n"
+                . __('messages.contact_close_email') . ' : ' . $request->close_email . "\n\n"
+                . $body
+            );
+        }
 
         $token  = Str::random(24);
         $count  = Ticket::count();
@@ -36,13 +53,13 @@ class ContactController extends Controller
             'numero'     => $numero,
             'email'      => $request->email,
             'question_1' => $request->question_1,
-            'question_2' => $request->question_2,
+            'question_2' => $question2,
             'statut'     => 'ouvert',
         ]);
 
         $ticketMessage = $ticket->messages()->create([
             'sender' => 'client',
-            'body'   => $request->message,
+            'body'   => $body,
         ]);
 
         // Pièces jointes PDF (max 2)
@@ -71,7 +88,7 @@ class ContactController extends Controller
             }
         }
 
-        ActivityLogger::ticket('CREATE', "Nouveau ticket {$ticket->numero} créé par {$ticket->email} (sujet: {$ticket->question_1} / {$ticket->question_2})", $ticket->email);
+        ActivityLogger::ticket('CREATE', ($closing ? '[CLÔTURE COMPTE] ' : '') . "Nouveau ticket {$ticket->numero} créé par {$ticket->email} (sujet: {$ticket->question_1} / {$question2})", $ticket->email);
 
         return redirect()->back()->with('ticket_submitted', true);
     }

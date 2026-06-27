@@ -57,6 +57,36 @@
                             @error('question_2') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        {{-- Encart clôture de compte (catégorie "abonnement") --}}
+                        <div class="mb-3" id="closeAccountBox" style="display:none;">
+                            <div class="border rounded p-3" style="background:#fff5f5;border-color:#f1aeb5 !important;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="close_account" name="close_account" value="1" {{ old('close_account') ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-semibold" for="close_account">
+                                        {{ __('messages.contact_close_account') }}
+                                    </label>
+                                </div>
+                                <p class="text-muted small mt-1 mb-2">{{ __('messages.contact_close_account_help') }}</p>
+
+                                <div id="closeFields" style="display:none;">
+                                    <div class="mb-2">
+                                        <label for="close_username" class="form-label fw-semibold mb-1">{{ __('messages.contact_close_username') }} <span class="text-danger">*</span></label>
+                                        <input type="text" id="close_username" name="close_username"
+                                               class="form-control @error('close_username') is-invalid @enderror"
+                                               value="{{ old('close_username') }}">
+                                        @error('close_username') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                    <div class="mb-1">
+                                        <label for="close_email" class="form-label fw-semibold mb-1">{{ __('messages.contact_close_email') }} <span class="text-danger">*</span></label>
+                                        <input type="email" id="close_email" name="close_email"
+                                               class="form-control @error('close_email') is-invalid @enderror"
+                                               value="{{ old('close_email') }}">
+                                        @error('close_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Message --}}
                         <div class="mb-3">
                             <label for="message" class="form-label fw-semibold">{{ __('messages.contact_message_label') }} <span class="text-danger">*</span></label>
@@ -186,6 +216,27 @@ const msgArea   = document.getElementById('message');
 const emailInp  = document.getElementById('email');
 const submitBtn = document.getElementById('submitBtn');
 const charCount = document.getElementById('charCount');
+const closeBox     = document.getElementById('closeAccountBox');
+const closeChk     = document.getElementById('close_account');
+const closeFields  = document.getElementById('closeFields');
+const closeUser    = document.getElementById('close_username');
+const closeEmail   = document.getElementById('close_email');
+
+function toggleCloseBox() {
+    if (q1.value === 'abonnement') {
+        closeBox.style.display = '';
+    } else {
+        closeBox.style.display = 'none';
+        closeChk.checked = false;
+    }
+    syncCloseFields();
+}
+function syncCloseFields() {
+    var on = closeChk.checked && closeBox.style.display !== 'none';
+    closeFields.style.display = on ? '' : 'none';
+    closeUser.required  = on;
+    closeEmail.required = on;
+}
 
 function populateQ2(val) {
     q2.innerHTML = '<option value="">' + selectPlaceholder + '</option>';
@@ -211,6 +262,7 @@ function populateQ2(val) {
         populateQ2(oldQ1);
         if (oldQ2) { q2.value = oldQ2; }
     }
+    toggleCloseBox();
     if (msgArea.value.length > 0) {
         charCount.textContent = msgArea.value.length + ' ' + charsSuffix;
     }
@@ -219,8 +271,12 @@ function populateQ2(val) {
 
 q1.addEventListener('change', function () {
     populateQ2(this.value);
+    toggleCloseBox();
     checkForm();
 });
+closeChk.addEventListener('change', function () { syncCloseFields(); checkForm(); });
+closeUser.addEventListener('input', checkForm);
+closeEmail.addEventListener('input', checkForm);
 q2.addEventListener('change', checkForm);
 msgArea.addEventListener('input', function () {
     charCount.textContent = this.value.length + ' ' + charsSuffix;
@@ -229,11 +285,13 @@ msgArea.addEventListener('input', function () {
 emailInp.addEventListener('input', checkForm);
 
 function checkForm() {
+    var closing = closeChk.checked && closeBox.style.display !== 'none';
     var q1ok    = q1.value !== '';
-    var q2ok    = q2Wrap.style.display !== 'none' && q2.value !== '';
-    var msgok   = msgArea.value.trim().length >= 1;
+    var q2ok    = closing || (q2Wrap.style.display !== 'none' && q2.value !== '');
+    var msgok   = closing || msgArea.value.trim().length >= 1;
     var emailok = emailInp.value.trim() !== '' && emailInp.validity.valid;
-    submitBtn.disabled = !(q1ok && q2ok && msgok && emailok);
+    var closeok = !closing || (closeUser.value.trim() !== '' && closeEmail.value.trim() !== '' && closeEmail.validity.valid);
+    submitBtn.disabled = !(q1ok && q2ok && msgok && emailok && closeok);
 }
 
 checkForm();
