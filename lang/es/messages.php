@@ -210,6 +210,7 @@ return [
     'news_coming_p1'   => 'Esta página estará disponible pronto.',
     'news_coming_p2'   => 'El equipo de PlanEx les agradece su paciencia y comprensión.',
     'footer_rights'    => '© :year PlanEx — Todos los derechos reservados',
+    'footer_cgu'       => 'Condiciones de Uso',
 
     // Cambio de contraseña obligatorio
     'force_change_title'       => 'Cambio de contraseña requerido',

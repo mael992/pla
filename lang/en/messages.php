@@ -210,6 +210,7 @@ return [
     'news_coming_p1'   => 'This page will be available soon.',
     'news_coming_p2'   => 'The PlanEx team thanks you for your patience and understanding.',
     'footer_rights'    => '© :year PlanEx — All rights reserved',
+    'footer_cgu'       => 'Terms of Use',
 
     // Forced password change
     'force_change_title'       => 'Password Change Required',

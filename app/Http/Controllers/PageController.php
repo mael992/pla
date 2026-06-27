@@ -25,4 +25,8 @@ class PageController extends Controller
     public function tarifs() {
         return view('tarifs');
     }
+
+    public function cgu() {
+        return view('cgu');
+    }
 }

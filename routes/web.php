@@ -22,6 +22,7 @@ Route::get('/',           [PageController::class, 'home'])->name('home');
 Route::get('/infos',      [PageController::class, 'infos'])->name('infos');
 Route::get('/tarifs',     [PageController::class, 'tarifs'])->name('tarifs');
 Route::get('/nouveautes', [PageController::class, 'nouveautes'])->name('nouveautes');
+Route::get('/cgu',        [PageController::class, 'cgu'])->name('cgu');
 
 // ── SEO : sitemap.xml ────────────────────────────────────────
 Route::get('/sitemap.xml', function () {
