@@ -28,10 +28,16 @@
 
                 <br><br>
 
-                <label>{{ __('messages.user_password_optional') }}</label>
-                <input type="password" name="password" minlength="8">
-                <small style="color:gray">{{ __('Minimum 8 caractères') }}</small>
-                @error('password') <span style="color:red">{{ $message }}</span> @enderror
+                <label>{{ __('messages.user_password') }}</label>
+                @if($user->role === 'admin')
+                    <div style="color:gray;font-size:0.9rem;">{{ __('messages.user_reset_password_admin_note') }}</div>
+                @else
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" name="reset_password" id="reset_password" value="1">
+                        <label class="form-check-label" for="reset_password">{{ __('messages.user_reset_password') }}</label>
+                    </div>
+                    <small style="color:gray">{{ __('messages.user_reset_password_help') }}</small>
+                @endif
 
                 <br><br>
 

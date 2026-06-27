@@ -61,6 +61,24 @@ class User extends Authenticatable
     }
 
     /**
+     * Génère un mot de passe provisoire aléatoire et lisible
+     * (sans caractères ambigus : I, O, l, o, 0, 1).
+     * Sert aux réinitialisations admin : l'admin ne choisit jamais le mot
+     * de passe, il est transmis via le courrier PDF puis changé à la
+     * première connexion.
+     */
+    public static function generateTempPassword(int $length = 10): string
+    {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+        $max   = strlen($chars) - 1;
+        $out   = '';
+        for ($i = 0; $i < $length; $i++) {
+            $out .= $chars[random_int(0, $max)];
+        }
+        return $out;
+    }
+
+    /**
      * Génère un identifiant unique au format "Prénom.Nom".
      * En cas de doublon, suffixe incrémental : Prénom.Nom1, Prénom.Nom2, ...
      */

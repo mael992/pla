@@ -77,15 +77,30 @@ class UserController extends Controller
         $user->email = $request->email ?: null;
         $user->role = $request->role;
 
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
+        // Réinitialisation du mot de passe = mot de passe PROVISOIRE généré par le
+        // système (jamais choisi/connu de l'admin). Transmis via le bouton 📄 PDF
+        // (à usage unique) puis obligatoirement changé à la première connexion.
+        // Réservé aux non-admins (les admins gèrent leur mot de passe via "Mon compte").
+        $passwordReset = false;
+        if ($request->boolean('reset_password') && $user->role !== 'admin') {
+            $temp = User::generateTempPassword();
+            $user->forceFill([
+                'password'                 => Hash::make($temp),
+                'temp_password'            => $temp,
+                'temp_password_expires_at' => now()->addHours(48),
+                'must_change_password'     => true,
+                'courrier_sent_at'         => null,   // réactive le courrier PDF (one-time)
+            ]);
+            $passwordReset = true;
         }
 
         $user->save();
 
-        ActivityLogger::user('UPDATE', "Utilisateur modifié : \"{$user->username}\" (role: {$user->role})");
+        ActivityLogger::user('UPDATE', "Utilisateur modifié : \"{$user->username}\" (role: {$user->role})"
+            . ($passwordReset ? ' [mot de passe provisoire réinitialisé]' : ''));
 
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')
+            ->with('success', __($passwordReset ? 'messages.user_password_reset' : 'messages.user_updated'));
     }
 
     public function courrier($id)
