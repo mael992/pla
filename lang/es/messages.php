@@ -212,6 +212,26 @@ return [
     'footer_rights'    => '© :year PlanEx — Todos los derechos reservados',
     'footer_cgu'       => 'Condiciones de Uso',
 
+    // ── Mi cuenta ───────────────────────────────────────────
+    'account_link'                  => 'Mi cuenta',
+    'account_title'                 => 'Mi cuenta',
+    'account_identity'              => 'Credenciales',
+    'account_username'              => 'Nombre de usuario de acceso',
+    'account_username_help'         => 'Su nombre de usuario de acceso y su rol los gestiona la administración y no pueden modificarse aquí.',
+    'account_role'                  => 'Rol',
+    'account_email_title'           => 'Correo electrónico',
+    'account_email_label'           => 'Correo electrónico',
+    'account_email_help'            => 'Se utiliza para recibir cartas y notificaciones. Déjelo vacío si no tiene.',
+    'account_current_password'      => 'Contraseña actual',
+    'account_current_password_help' => 'Requerida para confirmar el cambio.',
+    'account_save'                  => 'Guardar',
+    'account_email_updated'         => 'Correo electrónico actualizado.',
+    'account_pwd_title'             => 'Contraseña',
+    'account_new_password'          => 'Nueva contraseña',
+    'account_confirm_password'      => 'Confirmar nueva contraseña',
+    'account_pwd_updated'           => 'Contraseña actualizada.',
+    'account_pwd_change'            => 'Cambiar contraseña',
+
     // Cambio de contraseña obligatorio
     'force_change_title'       => 'Cambio de contraseña requerido',
     'force_change_subtitle'    => 'Por razones de seguridad, debe establecer una nueva contraseña antes de continuar.',

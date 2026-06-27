@@ -95,10 +95,10 @@
 
             @auth
                 <div class="nav-desktop-auth">
-                    <span class="user">
+                    <a href="{{ route('profile.edit') }}" class="user" style="text-decoration:none;color:inherit" title="{{ __('messages.account_link') }}">
                         <span class="user-dot"></span>
                         {{ auth()->user()->username }}
-                    </span>
+                    </a>
                     <div class="nav-sep"></div>
                     @if($hasAccess)
                         <a href="{{ route('chantiers.index') }}" class="btn-nav-users">
@@ -206,8 +206,11 @@
         @endif
 
         @auth
+            <div class="nav-mobile-divider"></div>
+            <a href="{{ route('profile.edit') }}" onclick="closeNavMenu()">
+                <span class="nav-mobile-icon">👤</span>{{ __('messages.account_link') }}
+            </a>
             @if($hasAccess)
-                <div class="nav-mobile-divider"></div>
                 <a href="{{ route('chantiers.index') }}" onclick="closeNavMenu()">
                     <span class="nav-mobile-icon">🏗️</span>{{ __('messages.nav_chantiers') }}
                 </a>

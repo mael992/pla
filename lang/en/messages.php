@@ -212,6 +212,26 @@ return [
     'footer_rights'    => '© :year PlanEx — All rights reserved',
     'footer_cgu'       => 'Terms of Use',
 
+    // ── My account ──────────────────────────────────────────
+    'account_link'                  => 'My account',
+    'account_title'                 => 'My account',
+    'account_identity'              => 'Credentials',
+    'account_username'              => 'Login username',
+    'account_username_help'         => 'Your login username and role are managed by the administration and cannot be changed here.',
+    'account_role'                  => 'Role',
+    'account_email_title'           => 'Email address',
+    'account_email_label'           => 'Email address',
+    'account_email_help'            => "Used to receive letters and notifications. Leave empty if you don't have one.",
+    'account_current_password'      => 'Current password',
+    'account_current_password_help' => 'Required to confirm the change.',
+    'account_save'                  => 'Save',
+    'account_email_updated'         => 'Email address updated.',
+    'account_pwd_title'             => 'Password',
+    'account_new_password'          => 'New password',
+    'account_confirm_password'      => 'Confirm new password',
+    'account_pwd_updated'           => 'Password updated.',
+    'account_pwd_change'            => 'Change password',
+
     // Forced password change
     'force_change_title'       => 'Password Change Required',
     'force_change_subtitle'    => 'For security reasons, you must set a new password before continuing.',

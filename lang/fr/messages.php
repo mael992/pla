@@ -212,6 +212,26 @@ return [
     'footer_rights'    => '© :year PlanEx — Tous droits réservés',
     'footer_cgu'       => "Conditions Générales d'Utilisation",
 
+    // ── Mon compte ──────────────────────────────────────────
+    'account_link'                  => 'Mon compte',
+    'account_title'                 => 'Mon compte',
+    'account_identity'              => 'Identifiants',
+    'account_username'              => 'Identifiant de connexion',
+    'account_username_help'         => "Votre identifiant de connexion et votre rôle sont gérés par l'administration et ne peuvent pas être modifiés ici.",
+    'account_role'                  => 'Rôle',
+    'account_email_title'           => 'Adresse e-mail',
+    'account_email_label'           => 'Adresse e-mail',
+    'account_email_help'            => "Utilisée pour recevoir les courriers et notifications. Laissez vide si vous n'en avez pas.",
+    'account_current_password'      => 'Mot de passe actuel',
+    'account_current_password_help' => 'Requis pour confirmer la modification.',
+    'account_save'                  => 'Enregistrer',
+    'account_email_updated'         => 'Adresse e-mail mise à jour.',
+    'account_pwd_title'             => 'Mot de passe',
+    'account_new_password'          => 'Nouveau mot de passe',
+    'account_confirm_password'      => 'Confirmer le nouveau mot de passe',
+    'account_pwd_updated'           => 'Mot de passe mis à jour.',
+    'account_pwd_change'            => 'Changer le mot de passe',
+
     // Changement de mot de passe forcé
     'force_change_title'       => 'Changement de mot de passe requis',
     'force_change_subtitle'    => 'Pour des raisons de sécurité, vous devez définir un nouveau mot de passe avant de continuer.',

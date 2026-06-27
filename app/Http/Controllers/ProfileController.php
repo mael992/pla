@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Page « Mon compte ».
      */
     public function edit(Request $request): View
     {
@@ -22,39 +22,30 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Met à jour les informations de l'utilisateur (e-mail).
+     * La modification exige la saisie du mot de passe actuel
+     * (ré-authentification avant modification).
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $validated = $request->validate([
+            'email' => [
+                'nullable', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($request->user()->id),
+            ],
+            'current_password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
+        $user      = $request->user();
+        $newEmail  = $validated['email'] ?: null;
+        $oldEmail  = $user->email;
 
-        Auth::logout();
+        $user->forceFill(['email' => $newEmail])->save();
 
-        $user->delete();
+        if ($newEmail !== $oldEmail) {
+            ActivityLogger::user('UPDATE', "E-mail de compte modifié : \"{$user->username}\" (" . ($oldEmail ?? '—') . " → " . ($newEmail ?? '—') . ")");
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 }

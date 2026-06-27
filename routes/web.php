@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ChantierController;
@@ -58,6 +59,12 @@ Route::middleware(['auth', 'incidents.access'])->group(function () {
 // Suppression : administrateurs uniquement
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/zones/{zone}', [ZoneController::class, 'destroy'])->name('zones.destroy');
+});
+
+// ── MON COMPTE (tout utilisateur connecté) ───────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/compte',   [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/compte', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 // ── ADMIN UNIQUEMENT ─────────────────────────────────────────
