@@ -37,7 +37,7 @@
             <table class="table table-hover mb-0 align-middle" id="usersTable">
                 <thead class="table-dark">
                     <tr>
-                        <th>{{ __('messages.col_id') }}</th>
+                        <th>{{ __('messages.col_num') }}</th>
                         <th>{{ __('messages.col_username') }}</th>
                         <th>{{ __('messages.col_email') }}</th>
                         <th>{{ __('messages.col_role') }}</th>
@@ -47,7 +47,7 @@
                 <tbody id="usersBody">
                 @forelse($users as $user)
                     <tr data-search="{{ strtolower($user->username . ' ' . ($user->email ?? '') . ' ' . $user->role) }}">
-                        <td class="fw-semibold text-muted">{{ $user->id }}</td>
+                        <td class="fw-semibold text-muted row-num">{{ $loop->iteration }}</td>
                         <td>
                             {{ $user->username }}
                             @if($user->id === auth()->id())
@@ -111,11 +111,16 @@ document.getElementById('userSearch').addEventListener('input', function () {
     const rows  = document.querySelectorAll('#usersBody tr');
     let visible = 0;
 
+    let n = 0;
     rows.forEach(row => {
         const data = row.dataset.search ?? '';
         const show = !q || data.includes(q);
         row.style.display = show ? '' : 'none';
-        if (show) visible++;
+        if (show) {
+            visible++;
+            const numCell = row.querySelector('.row-num');
+            if (numCell) numCell.textContent = ++n;   // renumérotage auto 1,2,3…
+        }
     });
 
     document.getElementById('noResults').classList.toggle('d-none', visible > 0);

@@ -68,6 +68,7 @@ return [
 
     // Table columns
     'col_id'           => 'Ref.',
+    'col_num'          => 'No.',
     'col_issued_on'    => 'Issued on',
     'col_photo_open'   => 'Open photo',
     'col_photo_closed' => 'Closed photo',

@@ -68,6 +68,7 @@ return [
 
     // Colonnes tableau
     'col_id'           => 'Réf.',
+    'col_num'          => 'N°',
     'col_issued_on'    => 'Émis le',
     'col_photo_open'   => 'Photo ouv.',
     'col_photo_closed' => 'Photo ferm.',

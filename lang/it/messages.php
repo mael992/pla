@@ -68,6 +68,7 @@ return [
 
     // Colonne tabella
     'col_id'           => 'Rif.',
+    'col_num'          => 'N°',
     'col_issued_on'    => 'Emesso il',
     'col_photo_open'   => 'Foto aperta',
     'col_photo_closed' => 'Foto chiusa',

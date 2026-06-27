@@ -68,6 +68,7 @@ return [
 
     // Columnas tabla
     'col_id'           => 'Ref.',
+    'col_num'          => 'N.º',
     'col_issued_on'    => 'Emitido el',
     'col_photo_open'   => 'Foto ab.',
     'col_photo_closed' => 'Foto cer.',
