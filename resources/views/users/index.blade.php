@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('messages.users_title') . ' — PlanEx')
+
 @section('content')
 
 <div class="container-fluid px-3 px-md-4 py-4">

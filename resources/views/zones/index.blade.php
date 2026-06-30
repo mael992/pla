@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('messages.zones_title') . ' — PlanEx')
+
 @section('content')
 <div class="container py-4" style="max-width: 600px;">
 

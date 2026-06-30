@@ -8,6 +8,11 @@
     <meta name="description" content="@yield('meta_description', __('messages.meta_default'))">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}?v=1">
+    <link rel="apple-touch-icon" href="{{ asset('favicon-180.png') }}?v=1">
+
     {{-- Open Graph (partage réseaux sociaux) --}}
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="PlanEx">

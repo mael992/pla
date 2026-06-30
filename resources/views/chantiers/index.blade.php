@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('messages.nav_chantiers') . ' — PlanEx')
+
 @section('content')
 <div class="container-fluid px-3 px-md-4 py-4">
 

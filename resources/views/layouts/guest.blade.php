@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>PlanEx — Connexion</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=1" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}?v=1">
+    <link rel="apple-touch-icon" href="{{ asset('favicon-180.png') }}?v=1">
+
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <!-- Styles PlanEx -->

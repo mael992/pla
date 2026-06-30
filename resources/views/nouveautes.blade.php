@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('messages.news_title') . ' — PlanEx')
+@section('title', __('messages.nav_news') . ' — PlanEx')
 @section('meta_description', __('messages.seo_news_desc'))
 
 @section('content')

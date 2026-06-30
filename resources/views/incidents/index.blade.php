@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', __('messages.nav_dashboard') . ' — PlanEx')
+
 @section('content')
 
 {{-- SIDEBAR --}}

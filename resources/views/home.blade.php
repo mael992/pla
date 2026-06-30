@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('messages.home_title'))
+@section('title', __('messages.nav_home') . ' — PlanEx')
 @section('meta_description', __('messages.seo_home_desc'))
 
 @section('styles')
