@@ -42,11 +42,9 @@
                 <br><br>
 
                 <label>{{ __('messages.user_password') }}</label>
-                <input type="password" name="password" required minlength="8">
-                <small style="color:gray">{{ __('Minimum 8 caractères') }}</small>
-                @error('password') <span style="color:red">{{ $message }}</span> @enderror
+                <div style="color:gray;font-size:0.9rem;">{{ __('messages.user_reset_password_help') }}</div>
 
-                <br><br>
+                <br>
 
                 <label>{{ __('messages.user_role') }}</label>
                 <select name="role" required>

@@ -31,11 +31,13 @@ class UserController extends Controller
             'prenom'   => 'required|string|max:255',
             'nom'      => 'required|string|max:255',
             'email'    => 'nullable|email|unique:users',
-            'password' => 'required|min:8',
             'role'     => 'required',
         ]);
 
-        $plainPassword = $request->password;
+        // Mot de passe PROVISOIRE généré par le système : l'admin ne le choisit
+        // ni ne le connaît. Transmis via le courrier PDF (one-time), puis changé
+        // obligatoirement à la première connexion.
+        $plainPassword = User::generateTempPassword();
 
         // Identifiant auto au format Prénom.Nom (+1 si doublon)
         $username = User::generateUsername($request->prenom, $request->nom);
